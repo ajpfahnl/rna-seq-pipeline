@@ -6,29 +6,154 @@ output: html_document
 ```{r, include = FALSE}
 #source("https://bioconductor.org/biocLite.R")
 #biocLite("DESeq2")
+#if (!requireNamespace("BiocManager", quietly = TRUE))
+#    install.packages("BiocManager")
+#BiocManager::install("apeglm", version = "3.8")
 
 library("DESeq2")
+library('apeglm')
 ```
 
 ```{r, include = FALSE}
-setwd("~/Desktop/Tarling-Vallim/raw_data/SxaQSEQsYB051L3L4_counts_0vs8")
+#setwd("~/Desktop/Tarling-Vallim/raw_data/SxaQSEQsYB051L3L4_counts")
 ```
 
 ```{r}
-directory <- "~/Desktop/Tarling-Vallim/raw_data/SxaQSEQsYB051L3L4_counts_0vs8"
-setwd(directory)
-sampleFiles <- grep("treated",list.files(directory),value=TRUE)
-#sampleCondition <- sub("(.*treated).*","\\1",sampleFiles)
-sampleNames <- c("Index01", "Index02", "Index03", "Index04", "Index09", "Index10", "Index11", "Index18", "Index19", "Index20", "Index21")
-sampleCondition <- c("Untreated", "Untreated", "Treated", "Treated", "Untreated", "Treated", "Untreated", "Untreated", "Treated", "Untreated", "Treated")
-sampleTable <- data.frame(sampleName = sampleNames,
-                          fileName = sampleFiles,
-                          condition = sampleCondition)
-setwd(directory)
-getwd()
-ddsHTSeq <- DESeqDataSetFromHTSeqCount(sampleTable = sampleTable, directory = directory, design = ~ condition)
-test <- read.table("~/Desktop/Tarling-Vallim/raw_data/SxaQSEQsYB051L3L4_counts_0vs8/7A_Index01_untreated0.count", header = F)
+directory <- "~/Desktop/SxaQSEQsYB051L5L6_counts"
+
+# to load in files for 8 week chow vs 8 week western
+patterns <- c("treated8","control8")
+sampleFiles <- grep(paste(patterns,collapse = '|') ,list.files(directory),value=TRUE)
+
+# 8 week western vs. 6 week western
+patterns <- c("treated8","treated6")
+sampleFiles <- grep(paste(patterns,collapse = '|') ,list.files(directory),value=TRUE)
+
+# 8 week chow vs. 4 week western
+patterns <- c("control8","treated4")
+sampleFiles <- grep(paste(patterns,collapse = '|') ,list.files(directory),value=TRUE)
+
+# 8 week chow vs. 2 week western
+patterns <- c("control8","treated2")
+sampleFiles <- grep(paste(patterns,collapse = '|') ,list.files(directory),value=TRUE)
+
+# 8 week chow vs. 6 week western
+patterns <- c("control8","treated6")
+sampleFiles <- grep(paste(patterns,collapse = '|') ,list.files(directory),value=TRUE)
+
+# 6 week western vs. 4 week western
+patterns <- c("treated6","treated4")
+sampleFiles <- grep(paste(patterns,collapse = '|') ,list.files(directory),value=TRUE)
+
+# 4 week western vs. 2 week western
+patterns <- c("treated4","treated2")
+sampleFiles <- grep(paste(patterns,collapse = '|') ,list.files(directory),value=TRUE)
+
+# 8 week western vs 4 week western
+patterns <- c("treated8","treated4")
+sampleFiles <- grep(paste(patterns,collapse = '|') ,list.files(directory),value=TRUE)
+
+# 8 week western vs 2 week western
+patterns <- c("treated8","treated2")
+sampleFiles <- grep(paste(patterns,collapse = '|') ,list.files(directory),value=TRUE)
+
+# 6 week western vs. 2 week western
+patterns <- c("treated6","treated2")
+sampleFiles <- grep(paste(patterns,collapse = '|') ,list.files(directory),value=TRUE)
 
 ```
 
+
+
+```{r}
+sampleCondition <- sub("(.*treated).*","\\1",sampleFiles)
+sampleTable <- data.frame(sampleName = sampleFiles,
+                          fileName = sampleFiles,
+                          condition = sampleFiles)
+
+test <- for(i in sampleFiles) {
+  for(j in names(sampleFiles))
+  {
+    if(i == j)
+    {
+      sampleFiles[i][j] <- 'yes'
+    }
+    else
+    {
+      sampleFiles$i <- 'yes'
+    }
+  }
+}
+
+sampleTable <- sampleTable %>% 
+  separate(col = 'condition', into = c("exp", "index", "condition"), sep = "_", remove = F)
+sampleTable <- subset(sampleTable, select = -c(exp, index))
+
+ddsHTSeq <- DESeqDataSetFromHTSeqCount(sampleTable = sampleTable,
+                                       directory = directory,
+                                       design= ~ condition)
+dds <- DESeq(ddsHTSeq)
+res <- results(dds)
+#resultsNames(dds)
+#resLFC <- lfcShrink(dds, coef="condition_untreated_vs_treated", type="apeglm")
+resOrdered <- res[order(res$pvalue),]
+
+# remove any empty values
+topT <- as.data.frame(res)
+topT <- topT[!is.na(topT$pvalue),]
+
+significant <- filter(topT, pvalue < 0.05) # get significant genes to be colored
+num_significant <- nrow(significant)
+# of the significant genes that are up or down regulated
+num_upregulated <- filter(significant, log2FoldChange > 0)
+num_downregulated <- filter(significant, log2FoldChange < 0)
+
+#ggplot(topT, aes(x = log2FoldChange, y = -log10(pvalue))) + geom_point(alpha = 0.2) + geom_point(data=significant, aes(log2FoldChange, -log10(pvalue)), color = "red", alpha = 0.2) + ggtitle('6-week Western vs. 2-week Western') + geom_text(label = num_significant, x = -3, y = 20) 
+#ggsave('6weekwestern_2weekwestern.pdf', width = 10, height = 8)
+```
+
+```{r}
+# Getting the list of genes and its information
+res_sig <- subset(resOrdered, pvalue < 0.05)
+write.csv(as.data.frame(res_sig), 
+          file="8weekwestern_6weekwestern.csv")
+
+```
+
+
+```{r}
+#create table for significant gene counts
+gene_counts <- read.csv("~/Desktop/gene_count.csv", header = T)
+
+ggplot(gene_counts, aes(x = weeks_on_western_A, y = weeks_on_western_B)) + geom_tile(aes(fill = sig_gene_count)) +
+  scale_fill_viridis(name = 'significant gene count') +
+  theme(panel.background = element_rect(fill = "gray40")) + 
+  scale_x_continuous(breaks = c(0, 2, 4, 6)) +
+  scale_y_continuous(breaks = c(0, 2, 4, 6, 8)) + 
+  geom_text(aes(label=signif(sig_gene_count, 4)), size=5) +
+  xlab('Weeks on Western Diet') + ylab('Weeks on Western Diet')
+ggsave('sig_gene_counts.png', height = 7, width = 10)
+
+up <- ggplot(gene_counts, aes(x = weeks_on_western_A, y = weeks_on_western_B)) + geom_tile(aes(fill = up_regulated)) +
+  scale_fill_viridis(name = 'up-regulated') +
+  theme(panel.background = element_rect(fill = "gray40")) + 
+  scale_x_continuous(breaks = c(0, 2, 4, 6)) +
+  scale_y_continuous(breaks = c(0, 2, 4, 6, 8)) + 
+  geom_text(aes(label=signif(up_regulated, 4)), size=5) +
+  xlab('Weeks on Western Diet') + ylab('Weeks on Western Diet')
+#ggsave('up-regulated.png', height = 7, width = 10)
+
+down <- ggplot(gene_counts, aes(x = weeks_on_western_A, y = weeks_on_western_B)) + geom_tile(aes(fill = down_regulated)) +
+  scale_fill_viridis(name = 'down-regulated', option = 'magma') +
+  theme(panel.background = element_rect(fill = "gray40")) + 
+  scale_x_continuous(breaks = c(0, 2, 4, 6)) +
+  scale_y_continuous(breaks = c(0, 2, 4, 6, 8)) + 
+  geom_text(aes(label=signif(down_regulated, 4)), size=5) +
+  xlab('Weeks on Western Diet') + ylab('Weeks on Western Diet')
+#ggsave('down-regulated.png', height = 7, width = 10)
+
+plot_grid(up, down)
+ggsave('updown-regulated_genes.png', width = 15, height = 7)
+
+```
 
