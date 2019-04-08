@@ -22,7 +22,7 @@ unzip htSeqTools.zip
 mv gallaher* htSeqTools/
 rm htSeqTools.zip
 ```
-Once htSeqTools has been installed, create a bash script to perform the demultiplexing using the following code.
+Once htSeqTools has been installed, create a bash script to perform the demultiplexing using the following code. Here, I created a script named demultiplex_L3.sh. 
 ```
 #!/bin/bash
 #$ -cwd
@@ -37,6 +37,8 @@ qseq2fastq
 cd ../../02_fastq/$LANE/
 demultiplexer
 ```
-
-
+To run this script, use the following command:
+```
+qsub demultiplex_L3.sh
+```
 
