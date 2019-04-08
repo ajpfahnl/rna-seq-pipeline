@@ -41,4 +41,7 @@ To run this script, use the following command:
 ```
 qsub demultiplex_L3.sh
 ```
+## Trimming
+This is a necessary step because we need to trim adaptor sequences that were added on for sequencing after isolating RNA. We then remove any low quality bases based on a Q value (which is defined as the negative log of the probability the base was called incorrectly). The Q value tends to decrease (quality gets worse) towards the 3’ end of the read. These lower quality regions can negatively impact downstream analyses such as mapping, mutation calling, etc.
+
 
