@@ -22,7 +22,7 @@ unzip htSeqTools.zip
 mv gallaher* htSeqTools/
 rm htSeqTools.zip
 ```
-Once htSeqTools has been installed, create a bash script to perform the demultiplexing using the following code. Here, I created a script named demultiplex_L3.sh to demultiplex lane 3. CRED refers to the name of the folder containing the raw qseq files. Note that the cd commands may need to be modified accordingly depending on the hierarchy of your files.
+Once htSeqTools has been installed, create a bash script to perform the demultiplexing using the following code. Here, I created a script named demultiplex_L3.sh to demultiplex lane 3. CRED refers to the name of the folder containing the raw qseq files. Note that the cd commands may need to be modified accordingly depending on the hierarchy of your files in order to access the correct directory!
 ```
 #!/bin/bash
 #$ -cwd
