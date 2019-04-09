@@ -41,7 +41,29 @@ To run this script, use the following command:
 ```
 qsub demultiplex_L3.sh
 ```
+This will create a directory called 02_fastq that contains all fastq files, and a directory called 03_demultiplexed that contains all demultiplexed files for each lane.
+
 ## Trimming
-This is a necessary step because we need to trim adaptor sequences that were added on for sequencing after isolating RNA. We then remove any low quality bases based on a Q value (which is defined as the negative log of the probability the base was called incorrectly). The Q value tends to decrease (quality gets worse) towards the 3’ end of the read. These lower quality regions can negatively impact downstream analyses such as mapping, mutation calling, etc.
+This is a necessary step because we need to trim adaptor sequences that were added on for sequencing after isolating RNA. We then remove any low quality bases based on a Q value (which is defined as the negative log of the probability the base was called incorrectly). The Q value tends to decrease (quality gets worse) towards the 3’ end of the read. These lower quality regions can negatively impact downstream analyses such as mapping, mutation calling, etc. We will do this using cutadapt.
+
+### Installing cutadapt
+```
+pip3 install --user --upgrade cutadapt
+```
+We create 3 scripts in each lane's demultiplexed folder called trim00s.sh, trim10s.sh, trim20s.sh to parallelize the trimming.
+#### trim00s.sh
+```
+#!/bin/bash
+#runs cutadapt to trim 10 As and 10 Ts with options -m 15 -q 30
+#on files 01-09
+
+for i in {1..9}
+do
+fastq="Index0${i}.for.fq"
+trimmedFastq="Index0${i}_trimmed.for.fq"
+/u/home/t/timyu98/.local/bin/cutadapt -a GATCGGAAGAGCACACGTCTGAACTCCAGTCACNNNNNNATCTCGTATGCCGTCTTCTGCTTG -a "A{10}" -a "T{10}" -m 15 -q 30 -o ../../L3_trimmed-fq/$trimmedFastq $fas$
+done
+```
+#### trim10s.sh
 
 
