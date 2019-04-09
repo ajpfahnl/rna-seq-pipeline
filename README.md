@@ -43,7 +43,7 @@ qsub demultiplex_L3.sh
 ```
 This will create a directory called 02_fastq that contains all fastq files, and a directory called 03_demultiplexed that contains all demultiplexed files for each lane.
 
-## Trimming
+## 2. Trimming
 This is a necessary step because we need to trim adaptor sequences that were added on for sequencing after isolating RNA. We then remove any low quality bases based on a Q value (which is defined as the negative log of the probability the base was called incorrectly). The Q value tends to decrease (quality gets worse) towards the 3’ end of the read. These lower quality regions can negatively impact downstream analyses such as mapping, mutation calling, etc. We will do this using cutadapt.
 
 ### Installing cutadapt
@@ -100,4 +100,18 @@ module load python/3.7.0
 To run the trimming, use the following command for each of the 3 scripts in every demultiplexed lane folder.
 ```
 qsub -cwd -V -N L3_trim00s -l h_data=4G,h_rt=8:00:00 -pe shared 4 trim00s.sh
+```
+## 3. Quality Control
+The purpose of quality control is to look for repetitive sequences. If it's there, it could be due to an error where the machine keeps sequencing the same fragment over and over again. As such, we need to get rid of it from the whole pool of sequences. Another issue is that maybe when trimming we didn't trim enough and kept a little of the adaptor sequences. We can check if something matches an illumina adaptor here. Lastly, we look for overrepresentation of certain base pairs at a particular position along fragment, since they should be equally divided.
+
+### Installing FastQC
+```
+mkdir FastQC_reports
+wget https://www.bioinformatics.babraham.ac.uk/projects/fastqc/fastqc_v0.11.7.zip
+unzip fastqc_v0.11.7.zip
+chmod 755 fastqc
+```
+Run this following command on a random index sample from each of the trimmed directories.
+```
+ ~/FastQC/fastqc --outdir=FastQC_reports ./L3_trimmed-fq/Index12_trimmed.for.fq
 ```
