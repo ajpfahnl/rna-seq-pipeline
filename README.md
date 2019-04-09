@@ -61,9 +61,41 @@ for i in {1..9}
 do
 fastq="Index0${i}.for.fq"
 trimmedFastq="Index0${i}_trimmed.for.fq"
-/u/home/t/timyu98/.local/bin/cutadapt -a GATCGGAAGAGCACACGTCTGAACTCCAGTCACNNNNNNATCTCGTATGCCGTCTTCTGCTTG -a "A{10}" -a "T{10}" -m 15 -q 30 -o ../../L3_trimmed-fq/$trimmedFastq $fas$
+/u/home/t/timyu98/.local/bin/cutadapt -a GATCGGAAGAGCACACGTCTGAACTCCAGTCACNNNNNNATCTCGTATGCCGTCTTCTGCTTG -a "A{10}" -a "T{10}" -m 15 -q 30 -o ../../L3_trimmed-fq/$trimmedFastq $fastq
 done
 ```
 #### trim10s.sh
+```
+#!/bin/bash
+#runs cutadapt with options -m 15 -q 30
+#on files 10-19, skipping 17
 
+for i in {0..6} {8..9}
+do
+fastq="Index1${i}.for.fq"
+trimmedFastq="Index1${i}_trimmed.for.fq"
+/u/home/t/timyu98/.local/bin/cutadapt -a GATCGGAAGAGCACACGTCTGAACTCCAGTCACNNNNNNATCTCGTATGCCGTCTTCTGCTTG -a "A{10}" -a "T{10}" -m 15 -q 30 -o ../../L3_trimmed-fq/$trimmedFastq $fastq
+done
+```
+#### trim20s.sh
+```
+#!/bin/bash
+#runs cutadapt with options -m 15 -q 30
+#on files 20-23, 25, 27
 
+for i in 0 1 2 3 5 7
+do
+fastq="Index2${i}.for.fq"
+trimmedFastq="Index2${i}_trimmed.for.fq"
+/u/home/t/timyu98/.local/bin/cutadapt -a GATCGGAAGAGCACACGTCTGAACTCCAGTCACNNNNNNATCTCGTATGCCGTCTTCTGCTTG -a "A{10}" -a "T{10}" -m 15 -q 30 -o ../../L3_trimmed-fq/$trimmedFastq $fastq
+done
+```
+Before you run the trimming, make sure that Python 3.7 is launched. Sometimes, Terminal can get pretty annoying about this and so an easy way to ensure this is to use the following two line command.
+```
+alias python=python3
+module load python/3.7.0
+```
+To run the trimming, use the following command for each of the 3 scripts in every demultiplexed lane folder.
+```
+qsub -cwd -V -N L3_trim00s -l h_data=4G,h_rt=8:00:00 -pe shared 4 trim00s.sh
+```
