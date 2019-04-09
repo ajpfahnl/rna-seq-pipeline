@@ -48,6 +48,8 @@ This is a necessary step because we need to trim adaptor sequences that were add
 
 ### Installing cutadapt
 ```
+module avail python
+module load python/3.7.2
 pip3 install --user --upgrade cutadapt
 ```
 We create 3 scripts in each lane's demultiplexed folder called trim00s.sh, trim10s.sh, trim20s.sh to parallelize the trimming.
