@@ -115,3 +115,5 @@ Run this following command on a random index sample from each of the trimmed dir
 ```
  ~/FastQC/fastqc --outdir=FastQC_reports ./L3_trimmed-fq/Index12_trimmed.for.fq
 ```
+## 4. Mapping
+We perform mapping using HISAT2.
