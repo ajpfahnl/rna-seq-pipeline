@@ -117,7 +117,7 @@ Run this following command on a random index sample from each of the trimmed dir
 ```
 To copy the resulting html files to the Desktop, use the following command.
 ```
-tims-mbp:Desktop timyu$ scp timyu98@Hoffman2.idre.ucla.edu:/u/flashscratch/t/timyu98/FastQC_reports/L5_Index12_trimmed.for_fastqc.html ./
+tims-mbp:Desktop timyu$ scp timyu98@Hoffman2.idre.ucla.edu:/u/flashscratch/t/timyu98/FastQC_reports/L3_Index12_trimmed.for_fastqc.html ./
 ```
 ## 4. Mapping
 We perform mapping using HISAT2.
