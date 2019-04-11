@@ -120,4 +120,36 @@ To copy the resulting html files to the Desktop, use the following command.
 tims-mbp:Desktop timyu$ scp timyu98@Hoffman2.idre.ucla.edu:/u/flashscratch/t/timyu98/FastQC_reports/L3_Index12_trimmed.for_fastqc.html ./
 ```
 ## 4. Mapping
-We perform mapping using HISAT2.
+We perform mapping using hisat2. hisat2 maps sequencing data to a single reference genome. This will allow us to infer what transcripts are being expressed. The first step is to download a reference genome.
+
+### Obtaining Reference Genome and Installing hisat2
+```
+mkdir GENCODE
+cd GENCODE
+wget ftp://ftp.ccb.jhu.edu/pub/infphilo/hisat2/data/grcm38.tar.gz
+tar xvf grcm38.tar.gz
+```
+Before running, make sure you load the hisat2 module.
+```
+module load hisat2
+```
+We create a script hisat2_map.sh that performs the mapping using a specified path.
+```
+#!/bin/bash
+#load hisat2 before running this script
+#use path='PATH' to directory containing fq files
+
+cd ${path}
+for i in ` ls Index*.fq |  awk 'BEGIN{FS="_"}{print $1}' | uniq`
+do
+fqFileName=${i}_trimmed.for.fq
+outFileName=${i}.sam
+hisat2 -q -p 8 -x /u/flashscratch/t/timyu98/GENCODE/grcm38/genome -U $fqFileName -S $outFileName
+done
+```
+To run, use the following command. You will need to do this for each lane's trimmed folder.
+```
+qsub -V -N hisat2L3 -l h_data=4G,h_rt=8:00:00 -pe shared 8 -v path='/u/flashscratch/t/timyu98/L3_trimmed-fq/' hisat2_map.sh
+```
+
+
