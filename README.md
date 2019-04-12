@@ -160,11 +160,11 @@ If we have replicates, now is the time to merge the datasets together. For insta
 ```
 wget https://github.com/broadinstitute/picard/releases/download/2.18.15/picard.jar -O picard.jar
 ```
-To load picard tools, use the following command:
+Before merging, we load picard tools using the following command:
 ```
 module load picard_tools
 ```
-Next, we create a bash script to merge the sam files output by the previous step using the following code.
+Next, we create a bash script mergeSam.sh to merge the sam files output by the previous step using the following code.
 ```
 #!/bin/bash
 #load picard_tools before running this script
@@ -180,6 +180,6 @@ done
 ```
 We can then merge lanes 2 and 3 using the following command:
 ```
-
+qsub -V -N mergeSam_23 -l h_data=4G,h_rt=4:00:00 -pe shared 2 -v L1dir='L2_sam' -v L2dir='L3_sam' -v mergedir='L2L3_merged' mergeSam.sh
 ```
 
