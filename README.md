@@ -182,4 +182,57 @@ We can then merge lanes 2 and 3 using the following command:
 ```
 qsub -V -N mergeSam_23 -l h_data=4G,h_rt=4:00:00 -pe shared 2 -v L1dir='L2_sam' -v L2dir='L3_sam' -v mergedir='L2L3_merged' mergeSam.sh
 ```
+## 6. Counting
+We've finally made it to the last step! Here, we'll generate counts for each of the genes that we mapped our reads too. The final product will be a list of genes and their counts. We will do this using htseq-count.
+### Download this (for some reason?)
+```
+cd GENCODE
+wget ftp://ftp.ensembl.org/pub/release-84/gtf/mus_musculus/Mus_musculus.GRCm38.84.gtf.gz
+gunzip Mus_musculus.GRCm38.84.gtf.gz
+```
+### Installing htseq-count
+```
+wget https://github.com/simon-anders/htseq/archive/release_0.11.0.tar.gz
+tar -zxvf release_0.11.0.tar.gz
+cd htseq-release_0.11.0/
+python setup.py install --user
+chmod +x scripts/htseq-count
+```
+If you're having any trouble downloading/using htseq-count, make sure that your Python version is set to Python 2.6.6. You can do this easily with the following two-liner.
+```
+alias python=python2
+module load python/2.7
+```
+Similar to trimming, we split the counting into three sets to parallelize it. As such, we have:
+count0.sh
+```
+#!/bin/bash
+#load python before running this script
+cd $SCRATCH
+for i in `ls ./${indir}/*0?_*.sam | awk 'BEGIN{FS="/"}{print$3}' | awk 'BEGIN{FS="_"}{print$1}' | uniq`
+do
+htseq-count -f bam -s reverse ./${indir}/${i}_merged.sam /u/scratch/t/timyu98/GENCODE/Mus_musculus.GRCm38.84.gtf > ./${outdir}/${i}.count
+done
+```
+count1.sh
+```
+#!/bin/bash
+#load python before running this script
+cd $SCRATCH
+for i in `ls ./${indir}/*1?_*.sam | awk 'BEGIN{FS="/"}{print$3}' | awk 'BEGIN{FS="_"}{print$1}' | uniq`
+do
+htseq-count -f bam -s reverse ./${indir}/${i}_merged.sam /u/scratch/t/timyu98/GENCODE/Mus_musculus.GRCm38.84.gtf > ./${outdir}/${i}.count
+done
+```
+count2.sh
+```
+#!/bin/bash
+#load python before running this script
+cd $SCRATCH
+for i in `ls ./${indir}/*2?_*.sam | awk 'BEGIN{FS="/"}{print$3}' | awk 'BEGIN{FS="_"}{print$1}' | uniq`
+do
+htseq-count -f bam -s reverse ./${indir}/${i}_merged.sam /u/scratch/t/timyu98/GENCODE/Mus_musculus.GRCm38.84.gtf > ./${outdir}/${i}.count
+done
+```
+
 
