@@ -180,7 +180,7 @@ done
 ```
 We can then merge lanes 2 and 3 using the following command:
 ```
-qsub -V -N mergeSam_23 -l h_data=4G,h_rt=4:00:00 -pe shared 2 -v L1dir='L2_sam' -v L2dir='L3_sam' -v mergedir='L2L3_merged' mergeSam.sh
+qsub -V -N mergeSam_23 -l h_data=8G,h_rt=8:00:00 -pe shared 2 -v L1dir='L2_sam' -v L2dir='L3_sam' -v mergedir='L2L3_merged' mergeSam.sh
 ```
 ## 6. Counting
 We've finally made it to the last step! Here, we'll generate counts for each of the genes that we mapped our reads too. The final product will be a list of genes and their counts. We will do this using htseq-count.
