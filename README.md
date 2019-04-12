@@ -160,6 +160,10 @@ If we have replicates, now is the time to merge the datasets together. For insta
 ```
 wget https://github.com/broadinstitute/picard/releases/download/2.18.15/picard.jar -O picard.jar
 ```
+To load picard tools, use the following command:
+```
+module load picard_tools
+```
 Next, we create a bash script to merge the sam files output by the previous step using the following code.
 ```
 #!/bin/bash
