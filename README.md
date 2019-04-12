@@ -151,5 +151,31 @@ To run, use the following command. You will need to do this for each lane's trim
 ```
 qsub -V -N hisat2L3 -l h_data=4G,h_rt=8:00:00 -pe shared 8 -v path='/u/flashscratch/t/timyu98/L3_trimmed-fq/' hisat2_map.sh
 ```
+Lastly, we can view the statistics of the alignment by checking the error output once the script has terminated.
 
+## 5. Merging
+If we have replicates, now is the time to merge the datasets together. For instance if lane 2 and lane 3 are replicates of one another, then we merge their mapped reads together. We do this using picard tools.
+
+### Installing picard tools
+```
+wget https://github.com/broadinstitute/picard/releases/download/2.18.15/picard.jar -O picard.jar
+```
+Next, we create a bash script to merge the sam files output by the previous step using the following code.
+```
+#!/bin/bash
+#load picard_tools before running this script
+#use L1dir='PATHtoL1' L2dir='PATHtoL2' mergedir='PATHtoDestination' to indicate paths for directories to L1, L2, and merged sam destination
+cd $SCRATCH/${L1dir}
+for i in `ls Index*.sam |  awk 'BEGIN{FS="."}{print $1}' | uniq`
+do
+java -jar $PICARD MergeSamFiles \
+I=$i.sam \
+I=../${L2dir}/$i.sam \
+O=../${mergedir}/${i}_merged.sam
+done
+```
+We can then merge lanes 2 and 3 using the following command:
+```
+
+```
 
