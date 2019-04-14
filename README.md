@@ -234,5 +234,7 @@ do
 htseq-count -f bam -s reverse ./${indir}/${i}_merged.sam /u/scratch/t/timyu98/GENCODE/Mus_musculus.GRCm38.84.gtf > ./${outdir}/${i}.count
 done
 ```
-
-
+Finally, to run each of these scripts. Use the following command format:
+```
+qsub -V -l h_data=4G,h_rt=7:00:00 -pe shared 8 -v indir='L2L3_merged' -v outdir='L2L3_counts' count0.sh
+```
