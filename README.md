@@ -238,3 +238,4 @@ Finally, to run each of these scripts. Use the following command format:
 ```
 qsub -V -l h_data=4G,h_rt=7:00:00 -pe shared 8 -v indir='L2L3_merged' -v outdir='L2L3_counts' count0.sh
 ```
+The resulting count files can be transferred to the local computer for downstream analyses.
