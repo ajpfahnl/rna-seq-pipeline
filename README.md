@@ -129,6 +129,14 @@ cd GENCODE
 wget ftp://ftp.ccb.jhu.edu/pub/infphilo/hisat2/data/grcm38.tar.gz
 tar xvf grcm38.tar.gz
 ```
+The above is an outdated version. The current updated version is:
+```
+mkdir GENCODE
+cd GENCODE
+wget ftp://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_mouse/release_M21/GRCm38.p6.genome.fa.gz
+
+
+
 Before running, make sure you load the hisat2 module.
 ```
 module load hisat2
