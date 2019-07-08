@@ -7,10 +7,6 @@ in the Tarling-Vallim lab.
 
 To execute this pipeline, you will need an account on the Hoffman server. I do everything in my scratch folder.
 
-### Prerequisites
-
-You will need the following installed before you begin your analyses.
-
 ## 1. Demultiplexing
 
 Multiple samples are pooled together during the sequencing run in the same lane, but given unique barcodes. Demultiplexing divides the raw reads into separate samples for analysis. We will do this using htSeqTools.
