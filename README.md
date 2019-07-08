@@ -188,7 +188,8 @@ qsub -V -N mergeSam_23 -l h_data=8G,h_rt=8:00:00 -pe shared 2 -v L1dir='L2_sam' 
 ```
 ## 6. Counting
 We've finally made it to the last step! Here, we'll generate counts for each of the genes that we mapped our reads too. The final product will be a list of genes and their counts. We will do this using htseq-count.
-### Download this
+### Download this (note: outdated)
+Create a directory to store the downloaded gene annotations. This file is outdated. If you want to use it, you must make sure to download the proper key for this file when you do downstream analyses.
 ```
 cd GENCODE
 wget ftp://ftp.ensembl.org/pub/release-84/gtf/mus_musculus/Mus_musculus.GRCm38.84.gtf.gz
