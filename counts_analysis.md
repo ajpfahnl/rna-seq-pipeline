@@ -15,13 +15,5 @@ if (!requireNamespace("BiocManager", quietly = TRUE))
 
 BiocManager::install("DESeq2")
 ```
-Install `tximportData` with this command in the console:
-```
-if (!requireNamespace("BiocManager", quietly = TRUE))
-    install.packages("BiocManager")
-
-BiocManager::install("tximportData")
-```
-
 ## Notes
 Will probably use `read.table` function
