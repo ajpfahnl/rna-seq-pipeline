@@ -1,7 +1,7 @@
 # Analyzing the counts data from the RNA-seq pipelin
 ## Intro
-We will use the DESeq2 package for R in RStudio. Documentation is here:
-http://bioconductor.org/packages/devel/bioc/vignettes/DESeq2/inst/doc/DESeq2.html
+We will use the DESeq2 package for R in RStudio. Documentation is here (htseq-count input section):
+http://bioconductor.org/packages/release/bioc/vignettes/DESeq2/inst/doc/DESeq2.html#htseq-count-input
 
 Sample RNA-seq workflow in R:
 http://master.bioconductor.org/packages/release/workflows/html/rnaseqGene.html
