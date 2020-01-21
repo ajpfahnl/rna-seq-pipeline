@@ -7,6 +7,13 @@ in the Tarling-Vallim lab.
 
 To execute this pipeline, you will need an account on the Hoffman2 server. I do everything in a folder `rna-seq` in my `$SCRATCH` folder.
 
+For more information on submitting batch jobs to Univa Grid Engine, look under section 4 of this pdf: \ http://www.univa.com/resources/files/univa_user_guide_univa__grid_engine_854.pdf \
+Section 4.2.2: Example 2: An Advanced Batch Job is particularly helpful.
+
+The IDRE Hoffman2 webpage on commonly-used UGE commands is here: \
+https://www.hoffman2.idre.ucla.edu/computing/sge/#qsub
+
+
 ## 1. Demultiplexing
 
 Multiple samples are pooled together during the sequencing run in the same lane, but given unique barcodes. Demultiplexing divides the raw reads into separate samples for analysis. We will do this using `htSeqTools`.
