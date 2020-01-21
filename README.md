@@ -300,8 +300,8 @@ python setup.py build install --user
 ```
 ### Counting
 Create a directory with `mkdir L3L4_counts`. \
-Similar to trimming, we split the counting into three sets to parallelize it. As such, we have: \
-count0.sh
+Similar to trimming, we split the counting into three sets to parallelize it. As such, we have:
+#### count0.sh
 ```
 #!/bin/bash
 #$ -V
@@ -326,7 +326,7 @@ do
         ./${outdir}/${i}.count
 done
 ```
-count1.sh
+#### count1.sh
 ```
 #!/bin/bash
 #$ -V
@@ -351,7 +351,7 @@ do
         ./${outdir}/${i}.count
 done
 ```
-count2.sh
+#### count2.sh
 ```
 #!/bin/bash
 #$ -V
