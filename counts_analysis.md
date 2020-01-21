@@ -23,3 +23,5 @@ if (!requireNamespace("BiocManager", quietly = TRUE))
 BiocManager::install("tximportData")
 ```
 
+## Notes
+Will probably use `read.table` function
