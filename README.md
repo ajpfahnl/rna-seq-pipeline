@@ -204,9 +204,9 @@ do
     fqFileName=${i}_trimmed.for.fq
     outFileName=${i}.sam
     hisat2 \
-	       -q \
-	       -p 8 \
-	       -x $SCRATCH/GENCODE/GRCm38 \
+    	-q \
+	-p 8 \
+	-x $SCRATCH/GENCODE/GRCm38 \
         -U $fqFileName \
         -S $outFileName
 done
