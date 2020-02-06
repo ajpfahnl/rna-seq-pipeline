@@ -37,7 +37,7 @@ PATH="$PATH:~/.local/bin"
 The `~/.local/bin` folder is important for `cutadapt` used later.
 
 Once `htSeqTools` has been installed, create a bash script to perform the demultiplexing using the following code. \
-Here, I created a script named `demultiplex.sh` to demultiplex lane 3. `$CRED` refers to the name of the folder containing the raw qseq files. The following script assumes `$CRED` folders are located in a folder `01_qseq`. Adjust `cd` commands as necessary. \
+`$CRED_list` is a list of folders containing raw qseq files separated by spaces. The following script assumes `$CRED` folders are located in a folder `01_qseq`. Adjust `cd` commands as necessary. \
 You may also need to adjust the output path in the `demultiplexer` or `qseq2fastq` Perl scripts that you installed from `htSeqTools`.
 #### demultiplex.sh
 ```
