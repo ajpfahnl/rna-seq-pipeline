@@ -31,14 +31,15 @@ rm htSeqTools.zip
 ```
 Make sure to add to your `$PATH` variable by adding the following lines to `~/.bash_profile`:
 ```
-PATH="$PATH:/u/scratch/a/ajpfahnl/htSeqTools/bin"
+PATH="$PATH:<directory with htSeqTools>/htSeqTools/bin"
 PATH="$PATH:~/.local/bin"
 ```
 The `~/.local/bin` folder is important for `cutadapt` used later.
 
 Once `htSeqTools` has been installed, create a bash script to perform the demultiplexing using the following code. \
-Here, I created a script named `demultiplex_L3.sh` to demultiplex lane 3. `$CRED` refers to the name of the folder containing the raw qseq files. Note that the `cd` commands may need to be modified accordingly depending on the hierarchy of your files in order to access the correct directory! \
+Here, I created a script named `demultiplex.sh` to demultiplex lane 3. `$CRED` refers to the name of the folder containing the raw qseq files. The following script assumes `$CRED` folders are located in a folder `01_qseq`. Adjust `cd` commands as necessary. \
 You may also need to adjust the output path in the `demultiplexer` or `qseq2fastq` Perl scripts that you installed from `htSeqTools`.
+#### demultiplex.sh
 ```
 #!/bin/bash
 #$ -cwd
@@ -64,7 +65,7 @@ wait
 ```
 To run this script, use the following command:
 ```
-qsub demultiplex_L3.sh
+qsub demultiplex.sh
 ```
 This will create a directory called `02_fastq` that contains all fastq files, and a directory called `03_demultiplexed` that contains all demultiplexed files for each lane.
 
