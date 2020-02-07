@@ -7,6 +7,8 @@ in the Tarling-Vallim lab.
 
 To execute this pipeline, you will need an account on the Hoffman2 server. I do everything in a folder `rna-seq` in my `$SCRATCH` folder.
 
+Create a folder `scripts` within `rna-seq` where we store all our scripts.
+
 For more information on submitting batch jobs to Univa Grid Engine, look under section 4 of this pdf: http://www.univa.com/resources/files/univa_user_guide_univa__grid_engine_854.pdf \
 Section 4.2.2: Example 2: An Advanced Batch Job is particularly helpful.
 
@@ -29,31 +31,41 @@ rm htSeqTools.zip
 ```
 Make sure to add to your `$PATH` variable by adding the following lines to `~/.bash_profile`:
 ```
-PATH="$PATH:/u/scratch/a/ajpfahnl/htSeqTools/bin"
+PATH="$PATH:<directory with htSeqTools>/htSeqTools/bin"
 PATH="$PATH:~/.local/bin"
 ```
 The `~/.local/bin` folder is important for `cutadapt` used later.
 
 Once `htSeqTools` has been installed, create a bash script to perform the demultiplexing using the following code. \
-Here, I created a script named `demultiplex_L3.sh` to demultiplex lane 3. `$CRED` refers to the name of the folder containing the raw qseq files. Note that the `cd` commands may need to be modified accordingly depending on the hierarchy of your files in order to access the correct directory! \
+`$CRED_list` is a list of folders containing raw qseq files separated by spaces. The following script assumes `$CRED` folders are located in a folder `01_qseq`. Adjust `cd` commands as necessary. \
 You may also need to adjust the output path in the `demultiplexer` or `qseq2fastq` Perl scripts that you installed from `htSeqTools`.
+#### 01_demultiplex.sh
 ```
 #!/bin/bash
 #$ -cwd
+#$ -N demultiplex
 #$ -V
-#$ -l h_data=8g,h_rt=48:00:00,highp
+#$ -l h_data=16g,h_rt=8:00:00
+#$ -pe shared 2
+#$ -M $USER
+#$ -m bea
 
-CRED='SxaQSEQsYB051L3'
-cd ../$CRED/$CRED
-pwd
-LANE=$(echo $CRED | sed -E 's/SxaQSEQs.{5}L(.):.{12}/lane_\1/')
-qseq2fastq
-cd ../../02_fastq/$LANE/
-demultiplexer
+CRED_list='SxaQSEQsYB051L3 SxaQSEQsYB051L4'
+demultiplex () {
+    local CRED=$1
+    cd ../01_qseq/$CRED
+    pwd
+    local LANE=$(echo $CRED | sed -E 's/SxaQSEQs.{5}L(.):.{12}/lane_\1/')
+    qseq2fastq
+    cd ../../02_fastq/$LANE/
+    demultiplexer
+}
+for CRED in $CRED_list; do demultiplex "$CRED" & done
+wait
 ```
 To run this script, use the following command:
 ```
-qsub demultiplex_L3.sh
+qsub 01_demultiplex.sh
 ```
 This will create a directory called `02_fastq` that contains all fastq files, and a directory called `03_demultiplexed` that contains all demultiplexed files for each lane.
 
@@ -69,88 +81,72 @@ pip3 install --user --upgrade cutadapt
 Make sure the `~/.local/bin` folder is added to `$PATH`.
 
 We create 3 scripts in each lane's demultiplexed folder called trim00s.sh, trim10s.sh, trim20s.sh to parallelize the trimming.
-#### trim00s.sh
+#### 02_trim.sh
 ```
 #!/bin/bash
 #$ -cwd
 #$ -V
 #$ -N L3_trim00s
-#$ -l h_data=4G,h_rt=8:00:00
-#$ -pe shared 4
+#$ -l h_data=32G,h_rt=8:00:00,exclusive
+# -pe shared 4
+#$ -M $USER
+#$ -m bea
 
 #runs cutadapt to trim 10 As and 10 Ts with options -m 15 -q 30
-#on files 01-09
 
-for i in {1..9}
-do
-    fastq="Index0${i}.for.fq"
-    trimmedFastq="Index0${i}_trimmed.for.fq"
+lanes="SxaQSEQsYB051L3 SxaQSEQsYB051L4"
+
+trim () {
+    local fastq=$1
+    local lane=$2
+    local num=$(echo ${fastq} | grep -o "[0-9][0-9]")
+    local trimmedFastq="Index${num}_trimmed.for.fq"
     cutadapt \
-        -a GATCGGAAGAGCACACGTCTGAACTCCAGTCACNNNNNNATCTCGTATGCCGTCTTCTGCTTG \
+	--quiet
+        -j 0
+	-a GATCGGAAGAGCACACGTCTGAACTCCAGTCACNNNNNNATCTCGTATGCCGTCTTCTGCTTG \
         -a "A{10}" \
         -a "T{10}" \
         -m 15 \
         -q 30 \
-        -o ../../L3_trimmed-fq/$trimmedFastq $fastq
-done
+        -o ../../04_trim/$lane/$trimmedFastq \
+        $fastq
+}
 
-```
-#### trim10s.sh
-```
-#!/bin/bash
-#$ -cwd
-#$ -V
-#$ -N L3_trim10s
-#$ -l h_data=4G,h_rt=8:00:00
-#$ -pe shared 4
+lane_trim () {
+    local lane=$1
+    cd ../03_demultiplexed/$lane
+    local files=$(find . | grep -o "Index[0-9][0-9].for.fq")
+    # trim each file in parallel
+    for file in $files; do trim "$file" "$lane" & done
+    wait
+}
 
-#runs cutadapt with options -m 15 -q 30
-#on files 10-19, skipping 17
+dir_check () {
+    local lane=$1
+    if [ ! -d "../04_trim/" ]
+    then
+        mkdir ../04_trim
+    fi
+    if [ ! -d "../04_trim/$lane" ]
+    then
+        mkdir ../04_trim/${lane}
+    fi
+}
 
-for i in {0..6} {8..9}
-do
-    fastq="Index1${i}.for.fq"
-    trimmedFastq="Index1${i}_trimmed.for.fq"
-    cutadapt \
-        -a GATCGGAAGAGCACACGTCTGAACTCCAGTCACNNNNNNATCTCGTATGCCGTCTTCTGCTTG \
-        -a "A{10}" \
-        -a "T{10}" \
-        -m 15 -q 30 \
-        -o ../../L3_trimmed-fq/$trimmedFastq $fastq
-done
-```
-#### trim20s.sh
-```
-#!/bin/bash
-#$ -cwd
-#$ -V
-#$ -N L3_trim20s
-#$ -l h_data=4G,h_rt=8:00:00
-#$ -pe shared 4
-
-#runs cutadapt with options -m 15 -q 30
-#on files 20-23, 25, 27
-
-for i in 0 1 2 3 5 7
-do
-    fastq="Index2${i}.for.fq"
-    trimmedFastq="Index2${i}_trimmed.for.fq"
-    cutadapt \
-        -a GATCGGAAGAGCACACGTCTGAACTCCAGTCACNNNNNNATCTCGTATGCCGTCTTCTGCTTG \
-        -a "A{10}" \
-        -a "T{10}" \
-        -m 15 \
-        -q 30 \
-        -o ../../L3_trimmed-fq/$trimmedFastq $fastq
-done
-        
+# check and create necessary directories
+for lane in $lanes; do dir_check "$lane"; done
+# trim each lane in parallel
+for lane in $lanes; do lane_trim "$lane" & done
+wait
+echo "Finished trimming"        
 ```
 Before you run the trimming, make sure that Python 3.7 is launched. Sometimes, Terminal can get pretty annoying about this and so an easy way to ensure this is to use the following two line command.
 ```
 alias python=python3
 module load python/3.7.0
 ```
-To run the trimming, run `qsub` followed by the script name for each script.
+To run the trimming, run `qsub 02_trim.sh`.
 
 ## 3. Quality Control
 The purpose of quality control is to look for repetitive sequences. If it's there, it could be due to an error where the machine keeps sequencing the same fragment over and over again. As such, we need to get rid of it from the whole pool of sequences. Another issue is that maybe when trimming we didn't trim enough and kept a little of the adaptor sequences. We can check if something matches an illumina adaptor here. Lastly, we look for overrepresentation of certain base pairs at a particular position along fragment, since they should be equally divided.
