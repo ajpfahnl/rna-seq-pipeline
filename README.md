@@ -80,7 +80,7 @@ pip3 install --user --upgrade cutadapt
 ```
 Make sure the `~/.local/bin` folder is added to `$PATH`.
 
-We create 3 scripts in each lane's demultiplexed folder called trim00s.sh, trim10s.sh, trim20s.sh to parallelize the trimming.
+Note: Testing the following script resulted in 171.848G of memory used.
 #### 02_trim.sh
 ```
 #!/bin/bash
