@@ -187,6 +187,11 @@ Build the index with the following command:
 ```
 hisat2-build GRCm38.p6.genome.fa GRCm38
 ```
+You may want to create an interactive session (or put this in a script and execute with `qsub`) when executing the command above, so that the system doesn't kill the process:
+```
+qrsh -l h_rt=8:00:00,h_data=4G -pe shared 4
+```
+
 We create a script `hisat2_map.sh` that performs the mapping using a specified path. Adjust the `$SCRATCH/GENCODE/GRCm38` path for option `-x` to the basename of the index for the reference genome. The basename is the name of any of the index files up to but not including the final `.1.ht2`, `.2.ht2`, etc.
 ```
 #!/bin/bash
