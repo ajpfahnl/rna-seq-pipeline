@@ -147,7 +147,7 @@ Before you run the trimming, make sure that Python 3.7 is launched. Sometimes, T
 alias python=python3
 module load python/3.7.0
 ```
-To run the trimming, run `qsub` followed by the script name for each script.
+To run the trimming, run `qsub 02_trim.sh`.
 
 ## 3. Quality Control
 The purpose of quality control is to look for repetitive sequences. If it's there, it could be due to an error where the machine keeps sequencing the same fragment over and over again. As such, we need to get rid of it from the whole pool of sequences. Another issue is that maybe when trimming we didn't trim enough and kept a little of the adaptor sequences. We can check if something matches an illumina adaptor here. Lastly, we look for overrepresentation of certain base pairs at a particular position along fragment, since they should be equally divided.
