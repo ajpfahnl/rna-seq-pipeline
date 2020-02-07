@@ -45,8 +45,8 @@ You may also need to adjust the output path in the `demultiplexer` or `qseq2fast
 #$ -cwd
 #$ -N demultiplex
 #$ -V
-#$ -l h_data=16g,h_rt=8:00:00
-#$ -pe shared 2
+#$ -l h_data=16g,h_rt=48:00:00,highp
+#$ -pe shared 2      
 #$ -M $USER
 #$ -m bea
 
