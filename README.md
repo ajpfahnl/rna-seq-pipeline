@@ -100,7 +100,6 @@ trim () {
     local fastq=$1
     local lane=$2
     local num=$(echo ${fastq} | grep -o "[0-9][0-9]")
-    echo $num
     local trimmedFastq="Index${num}_trimmed.for.fq"
     cutadapt \
 	--quiet
