@@ -80,15 +80,17 @@ pip3 install --user --upgrade cutadapt
 ```
 Make sure the `~/.local/bin` folder is added to `$PATH`.
 
-Note: Testing the following script resulted in 171.848G of memory used.
+Test data:
+ * Max vmem: 171.848G
+ * System Time: 00:28:44
+ * Wallclock Time: 00:24:36
 #### 02_trim.sh
 ```
 #!/bin/bash
 #$ -cwd
 #$ -V
-#$ -N L3_trim00s
+#$ -N trim
 #$ -l h_data=32G,h_rt=8:00:00,exclusive
-# -pe shared 4
 #$ -M $USER
 #$ -m bea
 
@@ -102,8 +104,8 @@ trim () {
     local num=$(echo ${fastq} | grep -o "[0-9][0-9]")
     local trimmedFastq="Index${num}_trimmed.for.fq"
     cutadapt \
-	--quiet
-        -j 0
+	--quiet \
+        -j 0 \
 	-a GATCGGAAGAGCACACGTCTGAACTCCAGTCACNNNNNNATCTCGTATGCCGTCTTCTGCTTG \
         -a "A{10}" \
         -a "T{10}" \
