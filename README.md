@@ -145,7 +145,7 @@ module load python/3.7.0
 ```
 To run the trimming, run `qsub 02_trim.sh`.
 
-Test data:
+Test data (options: `-l h_data=32G,h_rt=8:00:00,exclusive`):
  * Max vmem: 171.848G
  * System Time: 00:28:44
  * Wallclock Time: 00:24:36
