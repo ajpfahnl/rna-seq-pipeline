@@ -15,8 +15,9 @@ Section 4.2.2: Example 2: An Advanced Batch Job is particularly helpful.
 The IDRE Hoffman2 webpage on commonly-used UGE commands is here: \
 https://www.hoffman2.idre.ucla.edu/computing/sge/#qsub \
 Also look here: \
-https://www.hoffman2.idre.ucla.edu/computing/running/#Build_a_UGE_command_file_for_your_job_and_use_UGE_commands_directly
-
+https://www.hoffman2.idre.ucla.edu/computing/running/#Build_a_UGE_command_file_for_your_job_and_use_UGE_commands_directly \
+Another useful website: \
+https://www.ccn.ucla.edu/wiki/index.php/Hoffman2
 
 ## 1. Demultiplexing
 
