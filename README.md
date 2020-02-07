@@ -81,81 +81,66 @@ pip3 install --user --upgrade cutadapt
 Make sure the `~/.local/bin` folder is added to `$PATH`.
 
 We create 3 scripts in each lane's demultiplexed folder called trim00s.sh, trim10s.sh, trim20s.sh to parallelize the trimming.
-#### trim00s.sh
+#### 02_trim.sh
 ```
 #!/bin/bash
 #$ -cwd
 #$ -V
 #$ -N L3_trim00s
-#$ -l h_data=4G,h_rt=8:00:00
-#$ -pe shared 4
+#$ -l h_data=32G,h_rt=8:00:00,exclusive
+# -pe shared 4
+#$ -M $USER
+#$ -m bea
 
 #runs cutadapt to trim 10 As and 10 Ts with options -m 15 -q 30
-#on files 01-09
 
-for i in {1..9}
-do
-    fastq="Index0${i}.for.fq"
-    trimmedFastq="Index0${i}_trimmed.for.fq"
+lanes="SxaQSEQsYB051L3 SxaQSEQsYB051L4"
+
+trim () {
+    local fastq=$1
+    local lane=$2
+    local num=$(echo ${fastq} | grep -o "[0-9][0-9]")
+    echo $num
+    local trimmedFastq="Index${num}_trimmed.for.fq"
     cutadapt \
-        -a GATCGGAAGAGCACACGTCTGAACTCCAGTCACNNNNNNATCTCGTATGCCGTCTTCTGCTTG \
+	--quiet
+        -j 0
+	-a GATCGGAAGAGCACACGTCTGAACTCCAGTCACNNNNNNATCTCGTATGCCGTCTTCTGCTTG \
         -a "A{10}" \
         -a "T{10}" \
         -m 15 \
         -q 30 \
-        -o ../../L3_trimmed-fq/$trimmedFastq $fastq
-done
+        -o ../../04_trim/$lane/$trimmedFastq \
+        $fastq
+}
 
-```
-#### trim10s.sh
-```
-#!/bin/bash
-#$ -cwd
-#$ -V
-#$ -N L3_trim10s
-#$ -l h_data=4G,h_rt=8:00:00
-#$ -pe shared 4
+lane_trim () {
+    local lane=$1
+    cd ../03_demultiplexed/$lane
+    local files=$(find . | grep -o "Index[0-9][0-9].for.fq")
+    # trim each file in parallel
+    for file in $files; do trim "$file" "$lane" & done
+    wait
+}
 
-#runs cutadapt with options -m 15 -q 30
-#on files 10-19, skipping 17
+dir_check () {
+    local lane=$1
+    if [ ! -d "../04_trim/" ]
+    then
+        mkdir ../04_trim
+    fi
+    if [ ! -d "../04_trim/$lane" ]
+    then
+        mkdir ../04_trim/${lane}
+    fi
+}
 
-for i in {0..6} {8..9}
-do
-    fastq="Index1${i}.for.fq"
-    trimmedFastq="Index1${i}_trimmed.for.fq"
-    cutadapt \
-        -a GATCGGAAGAGCACACGTCTGAACTCCAGTCACNNNNNNATCTCGTATGCCGTCTTCTGCTTG \
-        -a "A{10}" \
-        -a "T{10}" \
-        -m 15 -q 30 \
-        -o ../../L3_trimmed-fq/$trimmedFastq $fastq
-done
-```
-#### trim20s.sh
-```
-#!/bin/bash
-#$ -cwd
-#$ -V
-#$ -N L3_trim20s
-#$ -l h_data=4G,h_rt=8:00:00
-#$ -pe shared 4
-
-#runs cutadapt with options -m 15 -q 30
-#on files 20-23, 25, 27
-
-for i in 0 1 2 3 5 7
-do
-    fastq="Index2${i}.for.fq"
-    trimmedFastq="Index2${i}_trimmed.for.fq"
-    cutadapt \
-        -a GATCGGAAGAGCACACGTCTGAACTCCAGTCACNNNNNNATCTCGTATGCCGTCTTCTGCTTG \
-        -a "A{10}" \
-        -a "T{10}" \
-        -m 15 \
-        -q 30 \
-        -o ../../L3_trimmed-fq/$trimmedFastq $fastq
-done
-        
+# check and create necessary directories
+for lane in $lanes; do dir_check "$lane"; done
+# trim each lane in parallel
+for lane in $lanes; do lane_trim "$lane" & done
+wait
+echo "Finished trimming"        
 ```
 Before you run the trimming, make sure that Python 3.7 is launched. Sometimes, Terminal can get pretty annoying about this and so an easy way to ensure this is to use the following two line command.
 ```
