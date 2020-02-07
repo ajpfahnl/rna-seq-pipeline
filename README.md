@@ -79,11 +79,6 @@ module load python/3.7.2
 pip3 install --user --upgrade cutadapt
 ```
 Make sure the `~/.local/bin` folder is added to `$PATH`.
-
-Test data:
- * Max vmem: 171.848G
- * System Time: 00:28:44
- * Wallclock Time: 00:24:36
 #### 02_trim.sh
 ```
 #!/bin/bash
@@ -150,6 +145,11 @@ module load python/3.7.0
 ```
 To run the trimming, run `qsub 02_trim.sh`.
 
+Test data:
+ * Max vmem: 171.848G
+ * System Time: 00:28:44
+ * Wallclock Time: 00:24:36
+
 ## 3. Quality Control
 The purpose of quality control is to look for repetitive sequences. If it's there, it could be due to an error where the machine keeps sequencing the same fragment over and over again. As such, we need to get rid of it from the whole pool of sequences. Another issue is that maybe when trimming we didn't trim enough and kept a little of the adaptor sequences. We can check if something matches an illumina adaptor here. Lastly, we look for overrepresentation of certain base pairs at a particular position along fragment, since they should be equally divided.
 
@@ -183,10 +183,15 @@ Before running, make sure you load the hisat2 module:
 ```
 module load hisat2
 ```
-Build the index with the following command:
+Build the index with the following command (use `-p` option for more cores):
 ```
-hisat2-build GRCm38.p6.genome.fa GRCm38
+hisat2-build GRCm38.p6.genome.fa -p 8 GRCm38
 ```
+Test data:
+ * Max vmem: 21.947G
+ * System Time: 00:06:22
+ * Wallclock Time: 00:39:21
+
 You may want to create an interactive session (or put this in a script and execute with `qsub`) when executing the command above, so that the system doesn't kill the process:
 ```
 qrsh -l h_rt=8:00:00,h_data=4G -pe shared 4
