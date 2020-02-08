@@ -36,7 +36,7 @@ PATH="$PATH:<directory with htSeqTools>/htSeqTools/bin"
 PATH="$PATH:~/.local/bin"
 ```
 The `~/.local/bin` folder is important for `cutadapt` used later.
-
+### Demultiplexing
 Once `htSeqTools` has been installed, create a bash script to perform the demultiplexing using the following code. \
 `$CRED_list` is a list of folders containing raw qseq files separated by spaces. The following script assumes `$CRED` folders are located in a folder `01_qseq`. Adjust `cd` commands as necessary. \
 You may also need to adjust the output path in the `demultiplexer` or `qseq2fastq` Perl scripts that you installed from `htSeqTools`.
@@ -80,6 +80,8 @@ module load python/3.7.2
 pip3 install --user --upgrade cutadapt
 ```
 Make sure the `~/.local/bin` folder is added to `$PATH`.
+### Trimming
+Trim with the following script:
 #### 02_trim.sh
 ```
 #!/bin/bash
@@ -161,6 +163,7 @@ wget https://www.bioinformatics.babraham.ac.uk/projects/fastqc/fastqc_v0.11.7.zi
 unzip fastqc_v0.11.7.zip
 chmod 755 fastqc
 ```
+### Running FastQC
 Run this following command on a random index sample from each of the trimmed directories.
 ```
  ~/FastQC/fastqc --outdir=FastQC_reports ./L3_trimmed-fq/Index12_trimmed.for.fq
