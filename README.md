@@ -201,9 +201,11 @@ Build the index with the following command (use `-p` option for more cores):
 hisat2-build GRCm38.p6.genome.fa -p 8 GRCm38
 ```
 Test data (options: `-l h_data=32G,h_rt=8:00:00,exclusive`, `-p 8` used but only 1 core actually in use):
- * Max vmem: 21.947G
+ * User Time: 02:12:15
  * System Time: 00:06:22
  * Wallclock Time: 00:39:21
+ * CPU: 02:18:38
+ * Max vmem: 21.947G
 
 You may want to create an interactive session (or put this in a script and execute with `qsub`) when executing the command above, so that the system doesn't kill the process:
 ```
