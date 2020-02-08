@@ -47,7 +47,7 @@ You may also need to adjust the output path in the `demultiplexer` or `qseq2fast
 #$ -N demultiplex
 #$ -V
 #$ -l h_data=16g,h_rt=48:00:00,highp
-#$ -pe shared 2      
+#$ -pe shared 2
 #$ -M $USER
 #$ -m bea
 
@@ -69,6 +69,13 @@ To run this script, use the following command:
 qsub 01_demultiplex.sh
 ```
 This will create a directory called `02_fastq` that contains all fastq files, and a directory called `03_demultiplexed` that contains all demultiplexed files for each lane.
+
+Test data (options `-l h_data=16g,h_rt=48:00:00,highp -pe shared 2`):
+ * User Time: 1:21:03:12
+ * System Time: 00:28:25
+ * Wallclock Time: 22:38:34
+ * CPU: 1:21:31:37
+ * Max vmem: 7.030G
 
 ## 2. Trimming
 This is a necessary step because we need to trim adaptor sequences that were added on for sequencing after isolating RNA. We then remove any low quality bases based on a Q value (which is defined as the negative log of the probability the base was called incorrectly). The Q value tends to decrease (quality gets worse) towards the 3’ end of the read. These lower quality regions can negatively impact downstream analyses such as mapping, mutation calling, etc. We will do this using cutadapt.
@@ -149,9 +156,11 @@ module load python/3.7.0
 To run the trimming, run `qsub 02_trim.sh`.
 
 Test data (options: `-l h_data=32G,h_rt=8:00:00,exclusive`):
- * Max vmem: 171.848G
+ * User Time: 04:23:20
  * System Time: 00:28:44
  * Wallclock Time: 00:24:36
+ * CPU: 04:52:04
+ * Max vmem: 171.848G
 
 ## 3. Quality Control
 The purpose of quality control is to look for repetitive sequences. If it's there, it could be due to an error where the machine keeps sequencing the same fragment over and over again. As such, we need to get rid of it from the whole pool of sequences. Another issue is that maybe when trimming we didn't trim enough and kept a little of the adaptor sequences. We can check if something matches an illumina adaptor here. Lastly, we look for overrepresentation of certain base pairs at a particular position along fragment, since they should be equally divided.
