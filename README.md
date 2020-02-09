@@ -292,8 +292,8 @@ Note: We can also use the built-in version of picard tools with `module load pic
 #$ -cwd
 #$ -V
 #$ -N merge
-#$ -l h_data=8G,h_rt=8:00:00
-#$ -pe shared 2
+#$ -l h_data=4G,h_rt=4:00:00,exclusive
+#$ -pe shared 4
 #$ -M $USER
 #$ -m bea
 
@@ -309,6 +309,7 @@ cd ../
 lane1_map=05_hisat2_map/$1
 lane2_map=05_hisat2_map/$2
 merge_dir=$3
+logs_dir=./06_merge_sam/logs
 
 dir_check () {
     if [ ! -d "./06_merge_sam/" ]
@@ -319,20 +320,43 @@ dir_check () {
     then
         mkdir ./06_merge_sam/${merge_dir}
     fi
+    if [ ! -d "./06_merge_sam/logs" ]
+    then
+	mkdir ./06_merge_sam/logs
+    fi
+}
+
+merge () {
+    local i=$1
+    touch $logs_dir/$i.log
+    java -jar $PICARD MergeSamFiles \
+        I=${lane1_map}/$i.sam \
+        I=${lane2_map}/$i.sam \
+        O=06_merge_sam/${merge_dir}/${i}_merged.sam \
+	> $logs_dir/$i.log \
+	2>&1
 }
 
 dir_check
 
-for i in `find ./${lane1_map}/Index*.sam |
+# number of processors
+N=4
+
+find ./${lane1_map}/Index*.sam |                                                                                                                                                                      
+          awk 'BEGIN{FS="/"}{print $4}' |                                                                                                                                                                       
+          awk 'BEGIN{FS="."}{print $1}' |                                                                                                                                                                       
+          uniq
+
+for sam in `find ./${lane1_map}/Index*.sam |
           awk 'BEGIN{FS="/"}{print $4}' |
           awk 'BEGIN{FS="."}{print $1}' |
           uniq`
 do
-    java -jar $PICARD MergeSamFiles \
-        I=${lane1_map}/$i.sam \
-        I=${lane2_map}/$i.sam \
-        O=06_merge_sam/${merge_dir}/${i}_merged.sam
+    ((i=i%N)); ((i++==0)) && wait
+    merge "$sam" &
 done
+wait
+
 
 ```
 We can then merge lanes (e.g. L3 and L4) using the following command as an example:
