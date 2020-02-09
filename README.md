@@ -267,18 +267,20 @@ If we have replicates, now is the time to merge the datasets together. For insta
 wget https://github.com/broadinstitute/picard/releases/download/2.18.15/picard.jar -O picard.jar
 ```
 #### New
+Installing from source:
 ```
 git clone https://github.com/broadinstitute/picard.git
 cd picard/
-
 ./gradlew shadowJar
 ```
 If necessary, load the correct version of Java. For example, at least Java 1.8 is needed for picard 2.21.8:
 ```
 module load java/1.8.0_111
 ```
-Test picard with:
+Test picard with with an interactive shell:
 ```
+qrsh -l h_rt=8:00:00,h_data=4G -pe shared 4
+cd <picard directory>
 java -jar build/libs/picard.jar -h
 ```
 ### Merging
