@@ -212,7 +212,7 @@ Test data (options: `-l h_data=32G,h_rt=8:00:00,exclusive`, `-p 8` used but only
  * Max vmem: 21.947G
  
 ### Mapping
-We create a script `hisat2_map.sh` that performs the mapping using a specified path. Adjust the `$SCRATCH/GENCODE/GRCm38` path for option `-x` to the basename of the index for the reference genome. The basename is the name of any of the index files up to but not including the final `.1.ht2`, `.2.ht2`, etc.
+We create a script `04_hisat2_map.sh` that performs the mapping using a specified path. Adjust the `../../GENCODE/GRCm38` path for option `-x` to the basename of the index for the reference genome. The basename is the name of any of the index files up to but not including the final `.1.ht2`, `.2.ht2`, etc.
 
 #### 04_hisat2_map.sh
 ```
@@ -223,7 +223,7 @@ We create a script `hisat2_map.sh` that performs the mapping using a specified p
 #$ -pe shared 8
 
 # load hisat2 before running this script
-# pass the base name of the directory containing
+# pass the basename of the directory containing
 # fq files as an argument
 
 lane=$1
@@ -262,42 +262,57 @@ Lastly, we can view the statistics of the alignment by checking the error output
 If we have replicates, now is the time to merge the datasets together. For instance if lane 2 and lane 3 are replicates of one another, then we merge their mapped reads together. We do this using picard tools.
 
 ### Installing picard tools
+#### Old
 ```
 wget https://github.com/broadinstitute/picard/releases/download/2.18.15/picard.jar -O picard.jar
 ```
+#### New
+```
+git clone https://github.com/broadinstitute/picard.git
+cd picard/
+
+./gradlew shadowJar
+```
+Run picard with
+```
+java -jar build/libs/picard.jar
+```
+### Merging
 Before merging, we load picard tools using the following command:
 ```
 module load picard_tools
 ```
-Next, we create a bash script `merge_sam.sh` to merge the sam files output by the previous step using the following code. Make sure to create the required input and output directories using the `mkdir` command.
+Next, we create a bash script `05_picard_merge.sh` to merge the sam files output by the previous step using the following code. Make sure to create the required input and output directories using the `mkdir` command.
+#### 05_picard_merge.sh
 ```
 #!/bin/bash
 #$ -cwd
 #$ -V
-#$ -N mergeSam_34
+#$ -N merge_L3L4
 #$ -l h_data=8G,h_rt=8:00:00
 #$ -pe shared 2
-#$ -v L1dir='L3_sam'
-#$ -v L2dir='L4_sam'
-#$ -v mergedir='L3L4_merged'
 
 # load picard_tools before running this script
 # use L1dir='PATHtoL1' L2dir='PATHtoL2'
 # mergedir='PATHtoDestination' to indicate
 # paths for directories to L1, L2, and merged
 # sam destination
-cd $SCRATCH/rna-seq/${L1dir}
+
+lane1_map=../05_hisat2_map/$1
+lane2_map=../05_hisat2_map/$2
+
+cd ../${lane1_map}
 for i in `ls Index*.sam |  awk 'BEGIN{FS="."}{print $1}' | uniq`
 do
     java -jar $PICARD MergeSamFiles \
         I=$i.sam \
-        I=../${L2dir}/$i.sam \
+        I=../${lane2_map}/$i.sam \
         O=../${mergedir}/${i}_merged.sam
 done
 ```
 We can then merge lanes 2 and 3 using the following command:
 ```
-qsub merge_sam.sh
+qsub merge_sam.sh SxaQSEQsYB051L3 SxaQSEQsYB051L4
 ```
 ## 6. Counting
 We've finally made it to the last step! Here, we'll generate counts for each of the genes that we mapped our reads too. The final product will be a list of genes and their counts. We will do this using htseq-count.
