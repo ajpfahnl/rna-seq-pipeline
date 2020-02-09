@@ -213,6 +213,8 @@ Test data (options: `-l h_data=32G,h_rt=8:00:00,exclusive`, `-p 8` used but only
  
 ### Mapping
 We create a script `hisat2_map.sh` that performs the mapping using a specified path. Adjust the `$SCRATCH/GENCODE/GRCm38` path for option `-x` to the basename of the index for the reference genome. The basename is the name of any of the index files up to but not including the final `.1.ht2`, `.2.ht2`, etc.
+
+#### 04_hisat2_map.sh
 ```
 #!/bin/bash
 #$ -cwd
@@ -220,32 +222,40 @@ We create a script `hisat2_map.sh` that performs the mapping using a specified p
 #$ -l h_data=4G,h_rt=8:00:00
 #$ -pe shared 8
 
-#load hisat2 before running this script
-#pass the directory containing fq files as an argument
+# load hisat2 before running this script
+# pass the base name of the directory containing
+# fq files as an argument
 
-cd $1 #path argument
+lane=$1
+
+dir_check () {
+    if [ ! -d "../05_hisat2_map/" ]
+    then
+        mkdir ../05_hisat2_map/
+    fi
+    if [ ! -d "../05_hisat2_map/$lane" ]
+    then
+        mkdir ../05_hisat2_map/${lane}
+    fi
+
+dir_check
+cd ../04_trim/$lane
 for i in $( ls Index*.fq |  awk 'BEGIN{FS="_"}{print $1}' | uniq )
 do
     fqFileName=${i}_trimmed.for.fq
-    outFileName=${i}.sam
+    outFileName=../../05_hisat2_map/$lane/${i}.sam
     hisat2 \
-    	-q \
-	-p 8 \
-	-x $SCRATCH/GENCODE/GRCm38 \
+	-q \
+        -p 8 \
+	-x ../../GENCODE/GRCm38 \
         -U $fqFileName \
         -S $outFileName
 done
 ```
-Now, run the script with for each trimmed lane with the command below.
+Now, run the script with for each trimmed lane like the command below:
 ```
-qsub -N hisat2<lane> hisat2_map.sh $SCRATCH/rna-seq/<trimmed lane directory>
+qsub -N map_L3 04_hisat2_map.sh SxaQSEQsYB051L3
 ```
-I also ran commands to move the `.sam` files into their own directories. e.g.:
-```
-mkdir L4_sam
-mv L4_trimmed-fq/*.sam L4_sam/
-```
-
 Lastly, we can view the statistics of the alignment by checking the error output once the script has terminated.
 
 ## 5. Merging
