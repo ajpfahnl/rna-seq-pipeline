@@ -300,7 +300,7 @@ Note: We can also use the built-in version of picard tools with `module load pic
 # arg 1: basename of lane 1 to merge in 05_hisat2_map
 # arg 2: basename of lane 2 to merge in 05_hisat2_map
 # arg 3: merged directory name (will be created in
-	 06_merge_sam)
+#        06_merge_sam)
 
 PICARD=~/picard/build/libs/picard.jar
 
@@ -311,24 +311,29 @@ lane2_map=05_hisat2_map/$2
 merge_dir=$3
 
 dir_check () {
-    if [ ! -d "../06_merge_sam/" ]
+    if [ ! -d "./06_merge_sam/" ]
     then
-        mkdir ../06_merge_sam/
+        mkdir ./06_merge_sam/
     fi
-    if [ ! -d "../06_merge_sam/$merge_dir" ]
+    if [ ! -d "./06_merge_sam/$merge_dir" ]
     then
-        mkdir ../06_merge_sam/${merge_dir}
+        mkdir ./06_merge_sam/${merge_dir}
     fi
+}
 
 dir_check
 
-for i in `ls Index*.sam |  awk 'BEGIN{FS="."}{print $1}' | uniq`
+for i in `find ./${lane1_map}/Index*.sam |
+          awk 'BEGIN{FS="/"}{print $4}' |
+          awk 'BEGIN{FS="."}{print $1}' |
+          uniq`
 do
     java -jar $PICARD MergeSamFiles \
         I=${lane1_map}/$i.sam \
         I=${lane2_map}/$i.sam \
         O=06_merge_sam/${merge_dir}/${i}_merged.sam
 done
+
 ```
 We can then merge lanes (e.g. L3 and L4) using the following command as an example:
 ```
