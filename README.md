@@ -284,12 +284,6 @@ qrsh -l h_rt=8:00:00,h_data=4G -pe shared 4
 java -jar ~/picard/build/libs/picard.jar -h
 ```
 ### Merging
-Before merging, we set up the built-in version of picard tools with:
-```
-module load picard_tools
-```
-Or set the `$PICARD` environmental variable to the path of the `picard.jar` file installed by the user:
-
 Next, we create a bash script `05_merge_sam.sh` to merge the sam files output by the previous step using the following code. Make sure to create the required input and output directories using the `mkdir` command.
 Note: We can also use the built-in version of picard tools with `module load picard_tools` and omit setting the `$PICARD` variable in the script
 #### 05_merge_sam.sh
