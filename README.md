@@ -261,13 +261,14 @@ Lastly, we can view the statistics of the alignment by checking the error output
 ## 5. Merging
 If we have replicates, now is the time to merge the datasets together. For instance if lane 2 and lane 3 are replicates of one another, then we merge their mapped reads together. We do this using picard tools.
 
-### Installing picard tools
-#### Old
+### Installing Picard Tools (For Latest Version)
+#### Pre-Compiled
 ```
-wget https://github.com/broadinstitute/picard/releases/download/2.18.15/picard.jar -O picard.jar
+wget https://github.com/broadinstitute/picard/releases/download/2.18.15/picard.jar
+wget https://github.com/broadinstitute/picard/releases/download/2.21.8/picard.jar
 ```
-#### New
-Installing from source:
+#### From Source
+Installing from source (I install in my home directory):
 ```
 git clone https://github.com/broadinstitute/picard.git
 cd picard/
@@ -277,19 +278,21 @@ If necessary, load the correct version of Java. For example, at least Java 1.8 i
 ```
 module load java/1.8.0_111
 ```
-Test picard with with an interactive shell:
+Test picard with with an interactive shell (not enough memory for login node):
 ```
 qrsh -l h_rt=8:00:00,h_data=4G -pe shared 4
-cd <picard directory>
-java -jar build/libs/picard.jar -h
+java -jar ~/picard/build/libs/picard.jar -h
 ```
 ### Merging
-Before merging, we load picard tools using the following command:
+Before merging, we set up the built-in version of picard tools with:
 ```
 module load picard_tools
 ```
-Next, we create a bash script `05_picard_merge.sh` to merge the sam files output by the previous step using the following code. Make sure to create the required input and output directories using the `mkdir` command.
-#### 05_picard_merge.sh
+Or set the `$PICARD` environmental variable to the path of the `picard.jar` file installed by the user:
+
+Next, we create a bash script `05_merge_sam.sh` to merge the sam files output by the previous step using the following code. Make sure to create the required input and output directories using the `mkdir` command.
+Note: We can also use the built-in version of picard tools with `module load picard_tools` and omit setting the `$PICARD` variable in the script
+#### 05_merge_sam.sh
 ```
 #!/bin/bash
 #$ -cwd
@@ -304,21 +307,35 @@ Next, we create a bash script `05_picard_merge.sh` to merge the sam files output
 # paths for directories to L1, L2, and merged
 # sam destination
 
+PICARD=~/picard/build/libs/picard.jar
+
 lane1_map=../05_hisat2_map/$1
 lane2_map=../05_hisat2_map/$2
+merge_dir=$3
 
-cd ../${lane1_map}
+dir_check () {
+    if [ ! -d "../06_merge_sam/" ]
+    then
+        mkdir ../06_merge_sam/
+    fi
+    if [ ! -d "../06_merge_sam/$merge_dir" ]
+    then
+        mkdir ../06_merge_sam/${merge_dir}
+    fi
+
+dir_check
+
 for i in `ls Index*.sam |  awk 'BEGIN{FS="."}{print $1}' | uniq`
 do
     java -jar $PICARD MergeSamFiles \
-        I=$i.sam \
-        I=../${lane2_map}/$i.sam \
-        O=../${mergedir}/${i}_merged.sam
+        I=${lane1_map}/$i.sam \
+        I=${lane2_map}/$i.sam \
+        O=../06_merge_sam/${merge_dir}/${i}_merged.sam
 done
 ```
 We can then merge lanes 2 and 3 using the following command:
 ```
-qsub merge_sam.sh SxaQSEQsYB051L3 SxaQSEQsYB051L4
+qsub merge_sam.sh SxaQSEQsYB051L3 SxaQSEQsYB051L4 L3_L4
 ```
 ## 6. Counting
 We've finally made it to the last step! Here, we'll generate counts for each of the genes that we mapped our reads too. The final product will be a list of genes and their counts. We will do this using htseq-count.
