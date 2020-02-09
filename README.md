@@ -185,7 +185,7 @@ $ scp <username>@Hoffman2.idre.ucla.edu:<scratch dir>/rna-seq/FastQC_reports/L3_
 ## 4. Mapping
 We perform mapping using hisat2. hisat2 maps sequencing data to a single reference genome. This will allow us to infer what transcripts are being expressed. The first step is to download a reference genome.
 
-### Obtaining Reference Genome and Installing hisat2
+### Obtaining Reference Genome and Creating an Index with hisat2
 ```
 mkdir GENCODE
 cd GENCODE
@@ -200,18 +200,18 @@ Build the index with the following command (use `-p` option for more cores):
 ```
 hisat2-build GRCm38.p6.genome.fa -p 8 GRCm38
 ```
+You may want to create an interactive session (or put this in a script and execute with `qsub`) when executing the command above, so that the system doesn't kill the process:
+```
+qrsh -l h_rt=8:00:00,h_data=4G -pe shared 4
+```
 Test data (options: `-l h_data=32G,h_rt=8:00:00,exclusive`, `-p 8` used but only 1 core actually in use):
  * User Time: 02:12:15
  * System Time: 00:06:22
  * Wallclock Time: 00:39:21
  * CPU: 02:18:38
  * Max vmem: 21.947G
-
-You may want to create an interactive session (or put this in a script and execute with `qsub`) when executing the command above, so that the system doesn't kill the process:
-```
-qrsh -l h_rt=8:00:00,h_data=4G -pe shared 4
-```
-
+ 
+### Mapping
 We create a script `hisat2_map.sh` that performs the mapping using a specified path. Adjust the `$SCRATCH/GENCODE/GRCm38` path for option `-x` to the basename of the index for the reference genome. The basename is the name of any of the index files up to but not including the final `.1.ht2`, `.2.ht2`, etc.
 ```
 #!/bin/bash
