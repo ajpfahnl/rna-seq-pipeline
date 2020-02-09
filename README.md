@@ -273,9 +273,13 @@ cd picard/
 
 ./gradlew shadowJar
 ```
-Run picard with
+If necessary, load the correct version of Java. For example, at least Java 1.8 is needed for picard 2.21.8:
 ```
-java -jar build/libs/picard.jar
+module load java/1.8.0_111
+```
+Test picard with:
+```
+java -jar build/libs/picard.jar -h
 ```
 ### Merging
 Before merging, we load picard tools using the following command:
