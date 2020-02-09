@@ -297,20 +297,21 @@ Note: We can also use the built-in version of picard tools with `module load pic
 #!/bin/bash
 #$ -cwd
 #$ -V
-#$ -N merge_L3L4
+#$ -N merge
 #$ -l h_data=8G,h_rt=8:00:00
 #$ -pe shared 2
 
-# load picard_tools before running this script
-# use L1dir='PATHtoL1' L2dir='PATHtoL2'
-# mergedir='PATHtoDestination' to indicate
-# paths for directories to L1, L2, and merged
-# sam destination
+# arg 1: basename of lane 1 to merge in 05_hisat2_map
+# arg 2: basename of lane 2 to merge in 05_hisat2_map
+# arg 3: merged directory name (will be created in
+	 06_merge_sam)
 
 PICARD=~/picard/build/libs/picard.jar
 
-lane1_map=../05_hisat2_map/$1
-lane2_map=../05_hisat2_map/$2
+cd ../
+
+lane1_map=05_hisat2_map/$1
+lane2_map=05_hisat2_map/$2
 merge_dir=$3
 
 dir_check () {
@@ -330,12 +331,12 @@ do
     java -jar $PICARD MergeSamFiles \
         I=${lane1_map}/$i.sam \
         I=${lane2_map}/$i.sam \
-        O=../06_merge_sam/${merge_dir}/${i}_merged.sam
+        O=06_merge_sam/${merge_dir}/${i}_merged.sam
 done
 ```
-We can then merge lanes 2 and 3 using the following command:
+We can then merge lanes (e.g. L3 and L4) using the following command as an example:
 ```
-qsub merge_sam.sh SxaQSEQsYB051L3 SxaQSEQsYB051L4 L3_L4
+qsub 05_merge_sam.sh SxaQSEQsYB051L3 SxaQSEQsYB051L4 L3_L4_merge
 ```
 ## 6. Counting
 We've finally made it to the last step! Here, we'll generate counts for each of the genes that we mapped our reads too. The final product will be a list of genes and their counts. We will do this using htseq-count.
