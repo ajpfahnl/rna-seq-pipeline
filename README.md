@@ -300,6 +300,8 @@ Note: We can also use the built-in version of picard tools with `module load pic
 #$ -N merge
 #$ -l h_data=8G,h_rt=8:00:00
 #$ -pe shared 2
+#$ -M $USER
+#$ -m bea
 
 # arg 1: basename of lane 1 to merge in 05_hisat2_map
 # arg 2: basename of lane 2 to merge in 05_hisat2_map
@@ -381,8 +383,11 @@ Similar to trimming, we split the counting into three sets to parallelize it. As
 #$ -V
 #$ -l h_data=4G,h_rt=7:00:00
 #$ -pe shared 8
+#$ -M $USER
+#$ -m bea
 indir='L3L4_merged'
 outdir='L3L4_counts'
+
 
 #load python before running this script
 
