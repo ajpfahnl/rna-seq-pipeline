@@ -342,11 +342,6 @@ dir_check
 # number of processors
 N=4
 
-find ./${lane1_map}/Index*.sam |                                                                                                                                                                      
-          awk 'BEGIN{FS="/"}{print $4}' |                                                                                                                                                                       
-          awk 'BEGIN{FS="."}{print $1}' |                                                                                                                                                                       
-          uniq
-
 for sam in `find ./${lane1_map}/Index*.sam |
           awk 'BEGIN{FS="/"}{print $4}' |
           awk 'BEGIN{FS="."}{print $1}' |
