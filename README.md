@@ -400,6 +400,7 @@ python setup.py build install --user
 #### 06_count.sh
 ```
 #!/bin/bash
+#$ -cwd
 #$ -V
 #$ -l h_data=4G,h_rt=7:00:00,exclusive
 # -pe shared 4
