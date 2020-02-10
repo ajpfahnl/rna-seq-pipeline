@@ -351,13 +351,17 @@ do
     merge "$sam" &
 done
 wait
-
-
 ```
 We can then merge lanes (e.g. L3 and L4) using the following command as an example:
 ```
 qsub 05_merge_sam.sh SxaQSEQsYB051L3 SxaQSEQsYB051L4 L3_L4_merge
 ```
+Test data (`-l h_data=4G,h_rt=4:00:00,exclusive -pe shared 4`):
+ * User Time: 07:02:29
+ * System Time: 00:33:08
+ * Wallclock Time: 01:55:14
+ * CPU: 07:35:38
+ * Max vmem: 45.442G
 ## 6. Counting
 We've finally made it to the last step! Here, we'll generate counts for each of the genes that we mapped our reads too. The final product will be a list of genes and their counts. We will do this using htseq-count.
 ### Download this (note: outdated)
