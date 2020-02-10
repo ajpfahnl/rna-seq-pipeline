@@ -397,86 +397,57 @@ module load python/2.7
 python setup.py build install --user
 ```
 ### Counting
-Create a directory with `mkdir L3L4_counts`. \
-Similar to trimming, we split the counting into three sets to parallelize it. As such, we have:
-#### count0.sh
+#### 06_count.sh
 ```
 #!/bin/bash
 #$ -V
-#$ -l h_data=4G,h_rt=7:00:00
-#$ -pe shared 8
+#$ -l h_data=4G,h_rt=7:00:00,exclusive
+# -pe shared 4
 #$ -M $USER
 #$ -m bea
-indir='L3L4_merged'
-outdir='L3L4_counts'
 
+# load python before running this script
+# arg 1: basename of directory with sam files
+#        located in the 06_merge_sam directory
+# arg 2: basename of directory with counts
+#        located in the 07_counts directory (either
+#        already created or will be created by
+#        this script)
+# arg 3: 1, 2, 3 ... etc of the first digit of
+#        the sam files (e.g. if $3 is 2, only
+#        Index20.sam, Index21.sam, ... , Index29.sam
+#        will be counted
+sam_dir=$1
+count_dir=$2
 
-#load python before running this script
+cd ../
 
-cd $SCRATCH/rna-seq/
-for i in `ls ./${indir}/*0?_*.sam |
-    awk 'BEGIN{FS="/"}{print$3}' |
+dir_check () {
+    if [ ! -d "./07_counts/" ]
+    then
+        mkdir ./07_counts/
+    fi
+    if [ ! -d "./07_counts/$count_dir" ]
+    then
+        mkdir ./07_counts/${count_dir}
+    fi
+}
+dir_check
+
+for i in `ls ./06_merge_sam/${sam_dir}/*${3}?_*.sam |
+    awk 'BEGIN{FS="/"}{print$4}' |
     awk 'BEGIN{FS="_"}{print$1}' |
     uniq`
 do
     htseq-count \
         -f bam \
         -s reverse \
-        ./${indir}/${i}_merged.sam \
-        $SCRATCH/rna-seq/GENAN/Mus_musculus.GRCm38.99.gtf > \
-        ./${outdir}/${i}.count
+        ./06_merge_sam/${sam_dir}/${i}_merged.sam \
+        ./GENAN/Mus_musculus.GRCm38.99.gtf > \
+        ./07_counts/${count_dir}/${i}.count
 done
 ```
-#### count1.sh
-```
-#!/bin/bash
-#$ -V
-#$ -l h_data=4G,h_rt=7:00:00
-#$ -pe shared 8
-indir='L3L4_merged'
-outdir='L3L4_counts'
-
-#load python before running this script
-
-cd $SCRATCH/rna-seq/
-for i in `ls ./${indir}/*1?_*.sam |
-    awk 'BEGIN{FS="/"}{print$3}' |
-    awk 'BEGIN{FS="_"}{print$1}' |
-    uniq`
-do
-    htseq-count \
-        -f bam \
-        -s reverse \
-        ./${indir}/${i}_merged.sam \
-        $SCRATCH/rna-seq/GENAN/Mus_musculus.GRCm38.99.gtf > \
-        ./${outdir}/${i}.count
-done
-```
-#### count2.sh
-```
-#!/bin/bash
-#$ -V
-#$ -l h_data=4G,h_rt=7:00:00
-#$ -pe shared 8
-indir='L3L4_merged'
-outdir='L3L4_counts'
-
-#load python before running this script
-
-cd $SCRATCH/rna-seq/
-for i in `ls ./${indir}/*2?_*.sam |
-    awk 'BEGIN{FS="/"}{print$3}' |
-    awk 'BEGIN{FS="_"}{print$1}' |
-    uniq`
-do
-    htseq-count \
-        -f bam \
-        -s reverse \
-        ./${indir}/${i}_merged.sam \
-        $SCRATCH/rna-seq/GENAN/Mus_musculus.GRCm38.99.gtf > \
-        ./${outdir}/${i}.count
-done
-```
-Finally, run each script with `qsub` followed by the script name.
+Run like so:
+`qsub -N count0x 06_count.sh L3_L4_merge L3_L4_counts 0`
 
 The resulting count files can be transferred to the local computer for downstream analyses.
