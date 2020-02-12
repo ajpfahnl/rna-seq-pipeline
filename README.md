@@ -255,13 +255,7 @@ You may want to create an interactive session (or put this in a script and execu
 ```
 qrsh -l h_rt=8:00:00,h_data=4G -pe shared 4
 ```
-Test data (options: `-l h_data=32G,h_rt=8:00:00,exclusive`, `-p 8` used but only 1 core actually in use):
- * User Time: 02:12:15
- * System Time: 00:06:22
- * Wallclock Time: 00:39:21
- * CPU: 02:18:38
- * Max vmem: 21.947G
- 
+
 ### Mapping
 We create a script `04_hisat2_map.sh` that performs the mapping using a specified path. Adjust the `../../GENCODE/GRCm38` path for option `-x` to the basename of the index for the reference genome. The basename is the name of any of the index files up to but not including the final `.1.ht2`, `.2.ht2`, etc.
 
