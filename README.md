@@ -297,7 +297,7 @@ do
         -S $outFileName
 done
 ```
-Now, run the script with for each trimmed lane like the command below:
+Now, run the script for each trimmed lane like the command below:
 ```
 qsub -N map_L3 04_hisat2_map.sh SxaQSEQsYB051L3
 ```
