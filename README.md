@@ -1,6 +1,5 @@
 # RNA-seq pipeline
 
-
 This is a custom RNA-seq pipeline that I have been using to convert raw Illumina RNA-seq datasets to lists of genes
 in the Tarling-Vallim lab.
 
@@ -187,78 +186,33 @@ $ scp <username>@Hoffman2.idre.ucla.edu:<scratch dir>/rna-seq/FastQC_reports/L3_
 We perform mapping using hisat2. hisat2 maps sequencing data to a single reference genome. This will allow us to infer what transcripts are being expressed. The first step is to download a reference genome.
 
 ### Obtaining Reference Genome and Creating an Index with hisat2
-Before running, make sure you load the hisat2 module. Also add the following directory:
 ```
-module load hisat2
-
 mkdir GENCODE
 cd GENCODE
+wget ftp://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_mouse/release_M21/GRCm38.p6.genome.fa.gz
+gunzip GRCm38.p6.genome.fa.gz
 ```
-Build the index with hisat2 using this script:
+Before running, make sure you load the hisat2 module:
 ```
-#!/bin/sh
-
-#
-# Downloads sequence for the GRCm38 release 99 version of M. Musculus (mouse) from
-# Ensembl.
-#
-# By default, this script builds and index for just the base files,
-# since alignments to those sequences are the most useful.  To change
-# which categories are built by this script, edit the CHRS_TO_INDEX
-# variable below.
-#
-
-ENSEMBL_RELEASE=99
-ENSEMBL_GRCm38_BASE=ftp://ftp.ensembl.org/pub/release-${ENSEMBL_RELEASE}/fasta/mus_musculus/dna
-
-get() {
-        file=$1
-        if ! wget --version >/dev/null 2>/dev/null ; then
-                if ! curl --version >/dev/null 2>/dev/null ; then
-                        echo "Please install wget or curl somewhere in your PATH"
-                        exit 1
-                fi
-                curl -o `basename $1` $1
-                return $?
-        else
-                wget $1
-                return $?
-        fi
-}
-
-HISAT2_BUILD_EXE=./hisat2-build
-if [ ! -x "$HISAT2_BUILD_EXE" ] ; then
-        if ! which hisat2-build ; then
-                echo "Could not find hisat2-build in current directory or in PATH"
-                exit 1
-        else
-                HISAT2_BUILD_EXE=`which hisat2-build`
-        fi
-fi
-
-rm -f genome.fa
-F=Mus_musculus.GRCm38.dna.primary_assembly.fa
-if [ ! -f $F ] ; then
-        get ${ENSEMBL_GRCm38_BASE}/$F.gz || (echo "Error getting $F" && exit 1)
-        gunzip $F.gz || (echo "Error unzipping $F" && exit 1)
-        mv $F genome.fa
-fi
-
-CMD="${HISAT2_BUILD_EXE} genome.fa genome"
-echo Running $CMD
-if $CMD ; then
-        echo "genome index built; you may remove fasta files"
-else
-        echo "Index building failed; see error message"
-fi
+module load hisat2
+```
+Build the index with the following command (use `-p` option for more cores):
+```
+hisat2-build GRCm38.p6.genome.fa -p 8 GRCm38
 ```
 You may want to create an interactive session (or put this in a script and execute with `qsub`) when executing the command above, so that the system doesn't kill the process:
 ```
 qrsh -l h_rt=8:00:00,h_data=4G -pe shared 4
 ```
-
+Test data (options: `-l h_data=32G,h_rt=8:00:00,exclusive`, `-p 8` used but only 1 core actually in use):
+ * User Time: 02:12:15
+ * System Time: 00:06:22
+ * Wallclock Time: 00:39:21
+ * CPU: 02:18:38
+ * Max vmem: 21.947G
+ 
 ### Mapping
-We create a script `04_hisat2_map.sh` that performs the mapping using a specified path. Adjust the `../../GENCODE/genome` path for option `-x` to the basename of the index for the reference genome. The basename is the name of any of the index files up to but not including the final `.1.ht2`, `.2.ht2`, etc.
+We create a script `04_hisat2_map.sh` that performs the mapping using a specified path. Adjust the `../../GENCODE/GRCm38` path for option `-x` to the basename of the index for the reference genome. The basename is the name of any of the index files up to but not including the final `.1.ht2`, `.2.ht2`, etc.
 
 #### 04_hisat2_map.sh
 ```
@@ -293,12 +247,12 @@ do
     hisat2 \
 	-q \
         -p 8 \
-	-x ../../GENCODE/genome \
+	-x ../../GENCODE/GRCm38 \
         -U $fqFileName \
         -S $outFileName
 done
 ```
-Now, run the script for each trimmed lane like the command below:
+Now, run the script with for each trimmed lane like the command below:
 ```
 qsub -N map_L3 04_hisat2_map.sh SxaQSEQsYB051L3
 ```
