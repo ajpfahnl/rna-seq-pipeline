@@ -257,7 +257,7 @@ qrsh -l h_rt=8:00:00,h_data=4G -pe shared 4
 ```
 
 ### Mapping
-We create a script `04_hisat2_map.sh` that performs the mapping using a specified path. Adjust the `../../GENCODE/GRCm38` path for option `-x` to the basename of the index for the reference genome. The basename is the name of any of the index files up to but not including the final `.1.ht2`, `.2.ht2`, etc.
+We create a script `04_hisat2_map.sh` that performs the mapping using a specified path. Adjust the `../../GENCODE/genome` path for option `-x` to the basename of the index for the reference genome. The basename is the name of any of the index files up to but not including the final `.1.ht2`, `.2.ht2`, etc.
 
 #### 04_hisat2_map.sh
 ```
@@ -292,7 +292,7 @@ do
     hisat2 \
 	-q \
         -p 8 \
-	-x ../../GENCODE/GRCm38 \
+	-x ../../GENCODE/genome \
         -U $fqFileName \
         -S $outFileName
 done
