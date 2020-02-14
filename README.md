@@ -409,6 +409,7 @@ module load python/2.7
 python setup.py build install --user
 ```
 ### Counting
+Make sure you have loaded Python 2.7: `module load python/2.7`.
 #### 06_count.sh
 ```
 #!/bin/bash
