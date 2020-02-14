@@ -185,13 +185,34 @@ $ scp <username>@Hoffman2.idre.ucla.edu:<scratch dir>/rna-seq/FastQC_reports/L3_
 ## 4. Mapping
 We perform mapping using hisat2. hisat2 maps sequencing data to a single reference genome. This will allow us to infer what transcripts are being expressed. The first step is to download a reference genome.
 
-### Obtaining Reference Genome and Creating an Index with hisat2
+### Obtaining Reference Genome and Gene Annotations
+
+1. Create a directory `rna-seq/GENCODE` and download the mouse genome. 
+2. Create a directory `rna-seq/GENAN` and download the associated gene annotations from the same website. This will be used later in the counting step.
+#### From `ftp.ebi.ac.uk` (we will use this in the next steps)
+Mouse genome:
 ```
-mkdir GENCODE
-cd GENCODE
 wget ftp://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_mouse/release_M21/GRCm38.p6.genome.fa.gz
 gunzip GRCm38.p6.genome.fa.gz
 ```
+Mouse genome annotations:
+```
+wget ftp://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_mouse/release_M21/gencode.vM21.annotation.gff3.gz
+gunzip gencode.vM21.annotation.gff3.gz
+```
+#### From `ftp.ensembl.org`
+Mouse genome:
+```
+ftp://ftp.ensembl.org/pub/release-99/fasta/mus_musculus/dna/Mus_musculus.GRCm38.dna.primary_assembly.fa.gz
+gunzip Mus_musculus.GRCm38.dna.primary_assembly.fa.gz
+```
+Mouse genome annotations:
+```
+wget ftp://ftp.ensembl.org/pub/release-99/gtf/mus_musculus/Mus_musculus.GRCm38.99.gtf.gz
+gunzip Mus_musculus.GRCm38.99.gtf.gz
+```
+
+#### Building an Index with hisat2
 Before running, make sure you load the hisat2 module:
 ```
 module load hisat2
@@ -264,7 +285,6 @@ If we have replicates, now is the time to merge the datasets together. For insta
 ### Installing Picard Tools (For Latest Version)
 #### Pre-Compiled
 ```
-wget https://github.com/broadinstitute/picard/releases/download/2.18.15/picard.jar
 wget https://github.com/broadinstitute/picard/releases/download/2.21.8/picard.jar
 ```
 #### From Source
@@ -364,16 +384,8 @@ Test data (`-l h_data=4G,h_rt=4:00:00,exclusive -pe shared 4`):
  * Max vmem: 45.442G
 ## 6. Counting
 We've finally made it to the last step! Here, we'll generate counts for each of the genes that we mapped our reads too. The final product will be a list of genes and their counts. We will do this using htseq-count.
-### Download this (note: outdated)
-Create a directory to store the downloaded gene annotations. This file is outdated. If you want to use it, you must make sure to download the proper key for this file when you do downstream analyses.
-```
-mkdir GENAN
-cd GENAN
-wget ftp://ftp.ensembl.org/pub/release-84/gtf/mus_musculus/Mus_musculus.GRCm38.84.gtf.gz
-gunzip Mus_musculus.GRCm38.84.gtf.gz
-```
-### Updated link
-`ftp://ftp.ensembl.org/pub/release-99/gtf/mus_musculus/Mus_musculus.GRCm38.99.gtf.gz`
+### Download Gene Annotations (if not done so already from the mapping step)
+Follow the steps in _Obtaining Reference Genome and Gene Annotations_ under _4. Mapping_.
 
 ### Installing htseq-count
 #### Old Steps
