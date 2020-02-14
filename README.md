@@ -454,10 +454,10 @@ for i in `ls ./06_merge_sam/${sam_dir}/*${3}?_*.sam |
     uniq`
 do
     htseq-count \
-        -f bam \
+        -f sam \
         -s reverse \
         ./06_merge_sam/${sam_dir}/${i}_merged.sam \
-        ./GENAN/Mus_musculus.GRCm38.99.gtf > \
+        ./GENAN/gencode.vM21.annotation.gff3 > \
         ./07_counts/${count_dir}/${i}.count
 done
 ```
