@@ -1,4 +1,7 @@
 # RNA-seq pipeline
+__THIS USES A SLIGHTLY DIFFERENT WAY TO INDEX (LOOK UNDER THE MAPPING STEP)__
+
+__MAKE SURE TO USE THE CORRECT ANNOTATED GENOME FILE FOR THE COUNTING STEP__
 
 This is a custom RNA-seq pipeline that I have been using to convert raw Illumina RNA-seq datasets to lists of genes
 in the Tarling-Vallim lab.
