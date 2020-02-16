@@ -212,7 +212,7 @@ wget ftp://ftp.ensembl.org/pub/release-99/gtf/mus_musculus/Mus_musculus.GRCm38.9
 gunzip Mus_musculus.GRCm38.99.gtf.gz
 ```
 
-#### Building an Index with hisat2
+### Building an Index with hisat2
 Before running, make sure you load the hisat2 module:
 ```
 module load hisat2
