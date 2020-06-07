@@ -1,0 +1,6 @@
+# annoying MacOS files
+.DS_Store
+Thumbs.db
+
+# R files to ignore
+.Rhistory
