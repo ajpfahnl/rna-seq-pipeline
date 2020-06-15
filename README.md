@@ -41,29 +41,6 @@ Once `htSeqTools` has been installed, create a bash script to perform the demult
 `$CRED_list` is a list of folders containing raw qseq files separated by spaces. The following script assumes `$CRED` folders are located in a folder `01_qseq`. Adjust `cd` commands as necessary. \
 You may also need to adjust the output path in the `demultiplexer` or `qseq2fastq` Perl scripts that you installed from `htSeqTools`.
 #### 01_demultiplex.sh
-```
-#!/bin/bash
-#$ -cwd
-#$ -N demultiplex
-#$ -V
-#$ -l h_data=16g,h_rt=48:00:00,highp
-#$ -pe shared 2
-#$ -M $USER
-#$ -m bea
-
-CRED_list='SxaQSEQsYB051L3 SxaQSEQsYB051L4'
-demultiplex () {
-    local CRED=$1
-    cd ../01_qseq/$CRED
-    pwd
-    local LANE=$(echo $CRED | sed -E 's/SxaQSEQs.{5}L(.):.{12}/lane_\1/')
-    qseq2fastq
-    cd ../../02_fastq/$LANE/
-    demultiplexer
-}
-for CRED in $CRED_list; do demultiplex "$CRED" & done
-wait
-```
 To run this script, use the following command:
 ```
 qsub 01_demultiplex.sh
@@ -90,65 +67,7 @@ Make sure the `~/.local/bin` folder is added to `$PATH`.
 ### Trimming
 Trim with the following script:
 #### 02_trim.sh
-```
-#!/bin/bash
-#$ -cwd
-#$ -V
-#$ -N trim
-#$ -l h_data=32G,h_rt=8:00:00,exclusive
-#$ -M $USER
-#$ -m bea
-
-#runs cutadapt to trim 10 As and 10 Ts with options -m 15 -q 30
-
-lanes="SxaQSEQsYB051L3 SxaQSEQsYB051L4"
-
-trim () {
-    local fastq=$1
-    local lane=$2
-    local num=$(echo ${fastq} | grep -o "[0-9][0-9]")
-    local trimmedFastq="Index${num}_trimmed.for.fq"
-    cutadapt \
-	--quiet \
-        -j 0 \
-	-a GATCGGAAGAGCACACGTCTGAACTCCAGTCACNNNNNNATCTCGTATGCCGTCTTCTGCTTG \
-        -a "A{10}" \
-        -a "T{10}" \
-        -m 15 \
-        -q 30 \
-        -o ../../04_trim/$lane/$trimmedFastq \
-        $fastq
-}
-
-lane_trim () {
-    local lane=$1
-    cd ../03_demultiplexed/$lane
-    local files=$(find . | grep -o "Index[0-9][0-9].for.fq")
-    # trim each file in parallel
-    for file in $files; do trim "$file" "$lane" & done
-    wait
-}
-
-dir_check () {
-    local lane=$1
-    if [ ! -d "../04_trim/" ]
-    then
-        mkdir ../04_trim
-    fi
-    if [ ! -d "../04_trim/$lane" ]
-    then
-        mkdir ../04_trim/${lane}
-    fi
-}
-
-# check and create necessary directories
-for lane in $lanes; do dir_check "$lane"; done
-# trim each lane in parallel
-for lane in $lanes; do lane_trim "$lane" & done
-wait
-echo "Finished trimming"        
-```
-Before you run the trimming, make sure that Python 3.7 is launched. Sometimes, Terminal can get pretty annoying about this and so an easy way to ensure this is to use the following two line command.
+Before you run the trimming, make sure that Python 3.7 is launched. An easy way to ensure this is to run the following commands:
 ```
 alias python=python3
 module load python/3.7.0
@@ -177,11 +96,7 @@ Run this following command on a random index sample from each of the trimmed dir
 ```
  ~/FastQC/fastqc --outdir=FastQC_reports ./L3_trimmed-fq/Index12_trimmed.for.fq
 ```
-To copy the resulting html files to the Desktop, use the following command on your local machine (MacOS).
-```
-$ cd ~/Desktop
-$ scp <username>@Hoffman2.idre.ucla.edu:<scratch dir>/rna-seq/FastQC_reports/L3_Index12_trimmed.for_fastqc.html ./
-```
+Use a program such as `scp` to copy to your local machine.
 ## 4. Mapping
 We perform mapping using hisat2. hisat2 maps sequencing data to a single reference genome. This will allow us to infer what transcripts are being expressed. The first step is to download a reference genome.
 
@@ -236,43 +151,6 @@ Test data (options: `-l h_data=32G,h_rt=8:00:00,exclusive`, `-p 8` used but only
 We create a script `04_hisat2_map.sh` that performs the mapping using a specified path. Adjust the `../../GENCODE/GRCm38` path for option `-x` to the basename of the index for the reference genome. The basename is the name of any of the index files up to but not including the final `.1.ht2`, `.2.ht2`, etc.
 
 #### 04_hisat2_map.sh
-```
-#!/bin/bash
-#$ -cwd
-#$ -V
-#$ -l h_data=4G,h_rt=8:00:00
-#$ -pe shared 8
-
-# load hisat2 before running this script
-# pass the basename of the directory containing
-# fq files as an argument
-
-lane=$1
-
-dir_check () {
-    if [ ! -d "../05_hisat2_map/" ]
-    then
-        mkdir ../05_hisat2_map/
-    fi
-    if [ ! -d "../05_hisat2_map/$lane" ]
-    then
-        mkdir ../05_hisat2_map/${lane}
-    fi
-
-dir_check
-cd ../04_trim/$lane
-for i in $( ls Index*.fq |  awk 'BEGIN{FS="_"}{print $1}' | uniq )
-do
-    fqFileName=${i}_trimmed.for.fq
-    outFileName=../../05_hisat2_map/$lane/${i}.sam
-    hisat2 \
-	-q \
-        -p 8 \
-	-x ../../GENCODE/GRCm38 \
-        -U $fqFileName \
-        -S $outFileName
-done
-```
 Now, run the script with for each trimmed lane like the command below:
 ```
 qsub -N map_L3 04_hisat2_map.sh SxaQSEQsYB051L3
@@ -304,74 +182,9 @@ qrsh -l h_rt=8:00:00,h_data=4G -pe shared 4
 java -jar ~/picard/build/libs/picard.jar -h
 ```
 ### Merging
-Next, we create a bash script `05_merge_sam.sh` to merge the sam files output by the previous step using the following code. Make sure to create the required input and output directories using the `mkdir` command.
+Next, we merge the sam files output from the previous step. Make sure to create the required input and output directories using the `mkdir` command.
 Note: We can also use the built-in version of picard tools with `module load picard_tools` and omit setting the `$PICARD` variable in the script
 #### 05_merge_sam.sh
-```
-#!/bin/bash
-#$ -cwd
-#$ -V
-#$ -N merge
-#$ -l h_data=4G,h_rt=4:00:00,exclusive
-#$ -pe shared 4
-#$ -M $USER
-#$ -m bea
-
-# arg 1: basename of lane 1 to merge in 05_hisat2_map
-# arg 2: basename of lane 2 to merge in 05_hisat2_map
-# arg 3: merged directory name (will be created in
-#        06_merge_sam)
-
-PICARD=~/picard/build/libs/picard.jar
-
-cd ../
-
-lane1_map=05_hisat2_map/$1
-lane2_map=05_hisat2_map/$2
-merge_dir=$3
-logs_dir=./06_merge_sam/logs
-
-dir_check () {
-    if [ ! -d "./06_merge_sam/" ]
-    then
-        mkdir ./06_merge_sam/
-    fi
-    if [ ! -d "./06_merge_sam/$merge_dir" ]
-    then
-        mkdir ./06_merge_sam/${merge_dir}
-    fi
-    if [ ! -d "./06_merge_sam/logs" ]
-    then
-	mkdir ./06_merge_sam/logs
-    fi
-}
-
-merge () {
-    local i=$1
-    touch $logs_dir/$i.log
-    java -jar $PICARD MergeSamFiles \
-        I=${lane1_map}/$i.sam \
-        I=${lane2_map}/$i.sam \
-        O=06_merge_sam/${merge_dir}/${i}_merged.sam \
-	> $logs_dir/$i.log \
-	2>&1
-}
-
-dir_check
-
-# number of processors
-N=4
-
-for sam in `find ./${lane1_map}/Index*.sam |
-          awk 'BEGIN{FS="/"}{print $4}' |
-          awk 'BEGIN{FS="."}{print $1}' |
-          uniq`
-do
-    ((i=i%N)); ((i++==0)) && wait
-    merge "$sam" &
-done
-wait
-```
 We can then merge lanes (e.g. L3 and L4) using the following command as an example:
 ```
 qsub 05_merge_sam.sh SxaQSEQsYB051L3 SxaQSEQsYB051L4 L3_L4_merge
@@ -411,56 +224,6 @@ python setup.py build install --user
 ### Counting
 Make sure you have loaded Python 2.7: `module load python/2.7`.
 #### 06_count.sh
-```
-#!/bin/bash
-#$ -cwd
-#$ -V
-#$ -l h_data=4G,h_rt=7:00:00,exclusive
-# -pe shared 4
-#$ -M $USER
-#$ -m bea
-
-# load python before running this script
-# arg 1: basename of directory with sam files
-#        located in the 06_merge_sam directory
-# arg 2: basename of directory with counts
-#        located in the 07_counts directory (either
-#        already created or will be created by
-#        this script)
-# arg 3: 1, 2, 3 ... etc of the first digit of
-#        the sam files (e.g. if $3 is 2, only
-#        Index20.sam, Index21.sam, ... , Index29.sam
-#        will be counted
-sam_dir=$1
-count_dir=$2
-
-cd ../
-
-dir_check () {
-    if [ ! -d "./07_counts/" ]
-    then
-        mkdir ./07_counts/
-    fi
-    if [ ! -d "./07_counts/$count_dir" ]
-    then
-        mkdir ./07_counts/${count_dir}
-    fi
-}
-dir_check
-
-for i in `ls ./06_merge_sam/${sam_dir}/*${3}?_*.sam |
-    awk 'BEGIN{FS="/"}{print$4}' |
-    awk 'BEGIN{FS="_"}{print$1}' |
-    uniq`
-do
-    htseq-count \
-        -f sam \
-        -s reverse \
-        ./06_merge_sam/${sam_dir}/${i}_merged.sam \
-        ./GENAN/gencode.vM21.annotation.gff3 > \
-        ./07_counts/${count_dir}/${i}.count
-done
-```
 Run like so:
 `qsub -N count0x 06_count.sh L3_L4_merge L3_L4_counts 0`
 
