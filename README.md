@@ -5,9 +5,9 @@ in the Tarling-Vallim lab.
 
 ## Getting Started
 
-To execute this pipeline, you will need an account on the Hoffman2 server. I do everything in a folder `rna-seq` in my `$SCRATCH` folder.
+To execute this pipeline, you will need an account on the Hoffman2 server. I do everything in a folder `$SCRATCH/rna-seq`.
 
-Create a folder `scripts` within `rna-seq` where we store all our scripts.
+Create a folder `rna-seq/scripts` where we store all our scripts.
 
 For more information on submitting batch jobs to Univa Grid Engine, look under section 4 of this pdf: http://www.univa.com/resources/files/univa_user_guide_univa__grid_engine_854.pdf \
 Section 4.2.2: Example 2: An Advanced Batch Job is particularly helpful.
