@@ -118,7 +118,7 @@ gunzip gencode.vM21.annotation.gff3.gz
 #### From `ftp.ensembl.org`
 Mouse genome:
 ```
-ftp://ftp.ensembl.org/pub/release-99/fasta/mus_musculus/dna/Mus_musculus.GRCm38.dna.primary_assembly.fa.gz
+wget ftp://ftp.ensembl.org/pub/release-99/fasta/mus_musculus/dna/Mus_musculus.GRCm38.dna.primary_assembly.fa.gz
 gunzip Mus_musculus.GRCm38.dna.primary_assembly.fa.gz
 ```
 Mouse genome annotations:
@@ -142,20 +142,23 @@ rm download
 make
 export PATH=~/hisat2-2.2.1:$PATH
 ```
-Build the index with the following command (use `-p` option for more cores):
+Sometimes hisat2 can't find the libraries or programs it needs to run. Try the following:
 ```
-hisat2-build GRCm38.p6.genome.fa -p 8 GRCm38
+module purge
+module load python/3.7.2
+module load gcc/7.2.0
 ```
-You may want to create an interactive session (or put this in a script and execute with `qsub`) when executing the command above, so that the system doesn't kill the process:
+#### 03_index_build.sh 
+The script builds the index with the following command (`-p` option for more cores):
 ```
-qrsh -l h_rt=8:00:00,h_data=4G -pe shared 4
+hisat2-build GRCm38.p6.genome.fa -p 4 GRCm38
 ```
-Test data (options: `-l h_data=32G,h_rt=8:00:00,exclusive`, `-p 8` used but only 1 core actually in use):
- * User Time: 02:12:15
- * System Time: 00:06:22
- * Wallclock Time: 00:39:21
- * CPU: 02:18:38
- * Max vmem: 21.947G
+Test data (options: `-l h_rt=1:00:00,h_data=4G -pe shared 4`):
+ * User Time        = 01:27:28
+ * System Time      = 00:01:28
+ * Wallclock Time   = 00:26:07
+ * CPU              = 01:28:57
+ * Max vmem         = 5.881G
  
 ### Mapping
 We create a script `04_hisat2_map.sh` that performs the mapping using a specified path. Adjust the `../../GENCODE/GRCm38` path for option `-x` to the basename of the index for the reference genome. The basename is the name of any of the index files up to but not including the final `.1.ht2`, `.2.ht2`, etc.
