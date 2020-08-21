@@ -72,14 +72,14 @@ Before you run the trimming, make sure that Python 3.7 is launched. An easy way 
 alias python=python3
 module load python/3.7.0
 ```
-To run the trimming, run `qsub 02_trim.sh`.
+To run the trimming, run `qsub -N <trim_name> 02_trim.sh <lane>` for each lane.
 
-Test data (options: `-l h_data=32G,h_rt=8:00:00,exclusive`):
- * User Time: 07:17:04
- * System Time: 00:43:39
- * Wallclock Time: 00:40:30
- * CPU: 08:00:44
- * Max vmem: 172.120G
+Test data (options: `-l h_data=4G,h_rt=2:00:00 -pe shared 4`):
+ * User Time        = 05:19:24
+ * System Time      = 00:08:04
+ * Wallclock Time   = 00:21:54
+ * CPU              = 05:27:29
+ * Max vmem         = 25.011G
  
 ## 3. Quality Control
 The purpose of quality control is to look for repetitive sequences. If it's there, it could be due to an error where the machine keeps sequencing the same fragment over and over again. As such, we need to get rid of it from the whole pool of sequences. Another issue is that maybe when trimming we didn't trim enough and kept a little of the adaptor sequences. We can check if something matches an illumina adaptor here. Lastly, we look for overrepresentation of certain base pairs at a particular position along fragment, since they should be equally divided.
