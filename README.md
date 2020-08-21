@@ -132,6 +132,16 @@ Before running, make sure you load the hisat2 module:
 ```
 module load hisat2
 ```
+To build from source for HISAT2 2.2.1, in your home directory `~`:
+```
+module purge
+module load gcc/7.2.0
+wget https://cloud.biohpc.swmed.edu/index.php/s/fE9QCsX3NH4QwBi/download
+unzip download
+rm download
+make
+export PATH=~/hisat2-2.2.1:$PATH
+```
 Build the index with the following command (use `-p` option for more cores):
 ```
 hisat2-build GRCm38.p6.genome.fa -p 8 GRCm38
