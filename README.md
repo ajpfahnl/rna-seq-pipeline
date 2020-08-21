@@ -9,6 +9,13 @@ To execute this pipeline, you will need an account on the Hoffman2 server. I do 
 
 Create a folder `rna-seq/scripts` where we store all our scripts.
 
+If data is stored on Google Drive, `gdown` is a good CLI tool for downloading those files which you can check out [here](https://pypi.org/project/gdown/). These are the steps I used:
+* `pip3 install gdown --user`
+* Go to the file on Google Drive, select "Open in new window", and note the file id. For example, `https://drive.google.com/file/d/1B3Ky0L_iDa4Gp-Ood617Hr09Lsi45RJq/view` has the id `1B3Ky0L_iDa4Gp-Ood617Hr09Lsi45RJq`.
+* Download the file with `gdown https://drive.google.com/uc?id=1B3Ky0L_iDa4Gp-Ood617Hr09Lsi45RJq`. Put the id after `uc?id=`.
+
+If the data is already demultiplexed, put the data in a folder `rna-seq/03_demultiplexed` and skip the demultiplexing step.
+
 For more information on submitting batch jobs to Univa Grid Engine, look under section 4 of this pdf: http://www.univa.com/resources/files/univa_user_guide_univa__grid_engine_854.pdf \
 Section 4.2.2: Example 2: An Advanced Batch Job is particularly helpful.
 
