@@ -44,10 +44,9 @@ PATH="$PATH:~/.local/bin"
 ```
 The `~/.local/bin` folder is important for `cutadapt` used later.
 ### Demultiplexing
-Once `htSeqTools` has been installed, create a bash script to perform the demultiplexing using the following code. \
-`$CRED_list` is a list of folders containing raw qseq files separated by spaces. The following script assumes `$CRED` folders are located in a folder `01_qseq`. Adjust `cd` commands as necessary. \
-You may also need to adjust the output path in the `demultiplexer` or `qseq2fastq` Perl scripts that you installed from `htSeqTools`.
 #### 01_demultiplex.sh
+The script assumes `$CRED` folders are located in a folder `01_qseq`. Adjust `cd` commands as necessary. \
+You may also need to adjust the output path in the `demultiplexer` or `qseq2fastq` Perl scripts that you installed from `htSeqTools`. \
 To run this script, use the following command:
 ```
 qsub 01_demultiplex.sh
@@ -168,10 +167,9 @@ Test data (options: `-l h_rt=1:00:00,h_data=4G -pe shared 4`):
  * Max vmem         = 5.881G
  
 ### Mapping
-We create a script `04_hisat2_map.sh` that performs the mapping using a specified path. Adjust the `../../GENCODE/GRCm38` path for option `-x` to the basename of the index for the reference genome. The basename is the name of any of the index files up to but not including the final `.1.ht2`, `.2.ht2`, etc.
-
 #### 04_hisat2_map.sh
-Now, run the script with for each trimmed lane like the command below:
+Adjust the `../../GENCODE/GRCm38` path for option `-x` to the basename of the index for the reference genome, if necessary. The basename is the name of any of the index files up to but not including the final `.1.ht2`, `.2.ht2`, etc. \
+Run the script for each trimmed lane like the command below:
 ```
 qsub -N map_L3 04_hisat2_map.sh SxaQSEQsYB051L3
 ```
@@ -202,7 +200,7 @@ qrsh -l h_rt=8:00:00,h_data=4G -pe shared 4
 java -jar ~/picard/build/libs/picard.jar -h
 ```
 ### Merging
-Next, we merge the sam files output from the previous step. Make sure to create the required input and output directories using the `mkdir` command.
+Next, we merge the sam files output from the previous step. \
 Note: We can also use the built-in version of picard tools with `module load picard_tools` and omit setting the `$PICARD` variable in the script
 #### 05_merge_sam.sh
 We can then merge lanes (e.g. L3 and L4) using the following command as an example:
@@ -216,8 +214,8 @@ Test data (`-l h_data=4G,h_rt=4:00:00,exclusive -pe shared 4`):
  * CPU: 07:35:38
  * Max vmem: 45.442G
 ## 6. Counting
-We've finally made it to the last step! Here, we'll generate counts for each of the genes that we mapped our reads too. The final product will be a list of genes and their counts. We will do this using htseq-count.
-### Download Gene Annotations (if not done so already from the mapping step)
+Finally, we'll generate counts for each of the genes that we mapped our reads too. The final product will be a list of genes and their counts. We will do this using `htseq-count`.
+### Download Gene Annotations
 Follow the steps in _Obtaining Reference Genome and Gene Annotations_ under _4. Mapping_.
 
 ### Installing htseq-count
