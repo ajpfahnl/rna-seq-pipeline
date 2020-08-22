@@ -221,28 +221,14 @@ We've finally made it to the last step! Here, we'll generate counts for each of 
 Follow the steps in _Obtaining Reference Genome and Gene Annotations_ under _4. Mapping_.
 
 ### Installing htseq-count
-#### Old Steps
-```
-wget https://github.com/simon-anders/htseq/archive/release_0.11.0.tar.gz
-tar -zxvf release_0.11.0.tar.gz
-cd htseq-release_0.11.0/
-python setup.py install --user
-chmod +x scripts/htseq-count
-```
-If you're having any trouble downloading/using htseq-count, make sure that your Python version is set to Python 2.6.6. You can do this easily with the following two-liner.
-```
-alias python=python2
-module load python/2.7
-```
-#### New Steps
 ```
 git clone https://github.com/simon-anders/htseq
 cd htseq
-module load python/2.7
+module load python/3.7.2
 python setup.py build install --user
 ```
 ### Counting
-Make sure you have loaded Python 2.7: `module load python/2.7`.
+Load a recent version of Python 3, e.g.: `module load python/3.7.2`.
 #### 06_count.sh
 Run like so:
 `qsub -N count0x 06_count.sh L3_L4_merge L3_L4_counts 0`
