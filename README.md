@@ -175,6 +175,13 @@ qsub -N map_L3 04_hisat2_map.sh SxaQSEQsYB051L3
 ```
 Lastly, we can view the statistics of the alignment by checking the error output once the script has terminated.
 
+Test data (options: `-l h_data=5G,h_rt=4:00:00 -pe shared 4`):
+ * User Time        = 04:08:43
+ * System Time      = 00:32:28
+ * Wallclock Time   = 01:17:18
+ * CPU              = 05:04:10
+ * Max vmem         = 4.518G
+
 ## 5. Merging
 If we have replicates, now is the time to merge the datasets together. For instance if lane 2 and lane 3 are replicates of one another, then we merge their mapped reads together. We do this using picard tools.
 
@@ -229,6 +236,6 @@ python3 setup.py build install --user
 Load a recent version of Python 3, e.g.: `module load python/3.7.2`.
 #### 06_count.sh
 Run like so:
-`qsub -N count0x 06_count.sh L3_L4_merge L3_L4_counts 0`
+`qsub 06_count.sh L3_L4_merge L3_L4_counts`
 
 The resulting count files can be transferred to the local computer for downstream analyses.
