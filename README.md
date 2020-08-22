@@ -223,7 +223,7 @@ Follow the steps in _Obtaining Reference Genome and Gene Annotations_ under _4. 
 git clone https://github.com/simon-anders/htseq
 cd htseq
 module load python/3.7.2
-python setup.py build install --user
+python3 setup.py build install --user
 ```
 ### Counting
 Load a recent version of Python 3, e.g.: `module load python/3.7.2`.
