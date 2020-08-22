@@ -214,12 +214,12 @@ We can then merge lanes (e.g. L3 and L4) using the following command as an examp
 ```
 qsub 05_merge_sam.sh SxaQSEQsYB051L3 SxaQSEQsYB051L4 L3_L4_merge
 ```
-Test data (`-l h_data=4G,h_rt=4:00:00,exclusive -pe shared 4`):
- * User Time: 07:02:29
- * System Time: 00:33:08
- * Wallclock Time: 01:55:14
- * CPU: 07:35:38
- * Max vmem: 45.442G
+Test data (`-l h_data=4G,h_rt=4:00:00 -pe shared 4`):
+ * User Time        = 02:29:53
+ * System Time      = 00:40:34
+ * Wallclock Time   = 01:20:00
+ * CPU              = 03:10:27
+ * Max vmem         = 145.938G
 ## 6. Counting
 Finally, we'll generate counts for each of the genes that we mapped our reads too. The final product will be a list of genes and their counts. We will do this using `htseq-count`.
 ### Download Gene Annotations
