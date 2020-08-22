@@ -16,15 +16,17 @@ If data is stored on Google Drive, `gdown` is a good CLI tool for downloading th
 
 If the data is already demultiplexed, put the data in a folder `rna-seq/03_demultiplexed` and skip the demultiplexing step.
 
-For more information on submitting batch jobs to Univa Grid Engine, look under section 4 of this pdf: http://www.univa.com/resources/files/univa_user_guide_univa__grid_engine_854.pdf \
-Section 4.2.2: Example 2: An Advanced Batch Job is particularly helpful.
+To set up your `PATH` environment, add these lines to add to your `~/.bashrc` or `~/.bash_profile` file, and then enter the command `source ~/.bashrc` or `source ~/.bash_profile`:
+* If demultiplexing, `PATH=~/htSeqTools/bin:$PATH`
+* `export PATH=~/.local/bin:$PATH` for `cutadapt`
+* `export PATH=~/hisat2-2.2.1:$PATH` for `hisat2` used later
+* `export PATH=<other_path_to_search>:$PATH` for any other directories that bash should search for programs in
 
-The IDRE Hoffman2 webpage on commonly-used UGE commands is here: \
-https://www.hoffman2.idre.ucla.edu/computing/sge/#qsub \
-Also look here: \
-https://www.hoffman2.idre.ucla.edu/computing/running/#Build_a_UGE_command_file_for_your_job_and_use_UGE_commands_directly \
-Another useful website: \
-https://www.ccn.ucla.edu/wiki/index.php/Hoffman2
+More information:
+* For submitting batch jobs to Univa Grid Engine, look under section 4 of [this](http://www.univa.com/resources/files/univa_user_guide_univa__grid_engine_854.pdf) pdf. Section 4.2.2: _Example 2: An Advanced Batch Job_ is particularly helpful.
+* The IDRE Hoffman2 webpage on commonly-used UGE commands is [here](https://www.hoffman2.idre.ucla.edu/computing/sge/#qsub).
+* Another page on UGE commands and command files is [here](https://www.hoffman2.idre.ucla.edu/computing/running/#Build_a_UGE_command_file_for_your_job_and_use_UGE_commands_directly).
+* Another useful website from the Center for Cognitive Neuroscience is [here](https://www.ccn.ucla.edu/wiki/index.php/Hoffman2).
 
 ## 1. Demultiplexing
 
@@ -37,12 +39,7 @@ unzip htSeqTools.zip
 mv gallaher* htSeqTools/
 rm htSeqTools.zip
 ```
-Make sure to add to your `$PATH` variable by adding the following lines to `~/.bash_profile`:
-```
-PATH="$PATH:<directory with htSeqTools>/htSeqTools/bin"
-PATH="$PATH:~/.local/bin"
-```
-The `~/.local/bin` folder is important for `cutadapt` used later.
+Make sure to add to your `$PATH` variable as described under _Getting Started_.
 ### Demultiplexing
 #### 01_demultiplex.sh
 The script assumes `$CRED` folders are located in a folder `01_qseq`. Adjust `cd` commands as necessary. \
