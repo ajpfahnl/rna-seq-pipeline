@@ -4,25 +4,29 @@ This is a custom RNA-seq pipeline that I have been using to convert raw Illumina
 in the Tarling-Vallim lab.
 
 ## Getting Started
-
 To execute this pipeline, you will need an account on the Hoffman2 server. I do everything in a folder `$SCRATCH/rna-seq`.
 
 Create a folder `rna-seq/scripts` where we store all our scripts.
 
-If data is stored on Google Drive, `gdown` is a good CLI tool for downloading those files which you can check out [here](https://pypi.org/project/gdown/). These are the steps I used:
+To see an overview of what the project directory should look like at the end, check out the directory tree [here](tree.md). 
+
+### Downloading from Google Drive
+`gdown` is a good CLI tool which you can check out [here](https://pypi.org/project/gdown/). These are the steps I used:
 * `pip3 install gdown --user`
 * Go to the file on Google Drive, select "Open in new window", and note the file id. For example, `https://drive.google.com/file/d/1B3Ky0L_iDa4Gp-Ood617Hr09Lsi45RJq/view` has the id `1B3Ky0L_iDa4Gp-Ood617Hr09Lsi45RJq`.
 * Download the file with `gdown https://drive.google.com/uc?id=1B3Ky0L_iDa4Gp-Ood617Hr09Lsi45RJq`. Put the id after `uc?id=`.
 
+### Skipping demultiplexing
 If the data is already demultiplexed, put the data in a folder `rna-seq/03_demultiplexed` and skip the demultiplexing step.
 
+### Setting up PATH environment variable
 To set up your `PATH` environment, add these lines to add to your `~/.bashrc` or `~/.bash_profile` file, and then enter the command `source ~/.bashrc` or `source ~/.bash_profile`:
 * If demultiplexing, `PATH=~/htSeqTools/bin:$PATH`
 * `export PATH=~/.local/bin:$PATH` for `cutadapt`
 * `export PATH=~/hisat2-2.2.1:$PATH` for `hisat2` used later
 * `export PATH=<other_path_to_search>:$PATH` for any other directories that bash should search for programs in
 
-More information:
+### More information
 * For submitting batch jobs to Univa Grid Engine, look under section 4 of [this](http://www.univa.com/resources/files/univa_user_guide_univa__grid_engine_854.pdf) pdf. Section 4.2.2: _Example 2: An Advanced Batch Job_ is particularly helpful.
 * The IDRE Hoffman2 webpage on commonly-used UGE commands is [here](https://www.hoffman2.idre.ucla.edu/computing/sge/#qsub).
 * Another page on UGE commands and command files is [here](https://www.hoffman2.idre.ucla.edu/computing/running/#Build_a_UGE_command_file_for_your_job_and_use_UGE_commands_directly).
@@ -75,7 +79,10 @@ Before you run the trimming, make sure that Python 3.7 is launched. An easy way 
 alias python=python3
 module load python/3.7.0
 ```
-To run the trimming, run `qsub -N <trim_name> 02_trim.sh <lane>` for each lane.
+To run the trimming, run the following for each lane:
+```
+qsub -N <trim_name> 02_trim.sh <lane>
+```
 
 Test data (options: `-l h_data=4G,h_rt=2:00:00 -pe shared 4`):
  * User Time        = 05:19:24
@@ -232,7 +239,15 @@ python3 setup.py build install --user
 ### Counting
 Load a recent version of Python 3, e.g.: `module load python/3.7.2`.
 #### 06_count.sh
-Run like so:
-`qsub 06_count.sh L3_L4_merge L3_L4_counts`
+Adjust the gene annotation file name as necessary, and run like so:
+```
+qsub 06_count.sh L3_L4_merge L3_L4_counts
+```
+Test data (`-l h_data=6G,h_rt=3:30:00 -pe shared 8`):
+ * User Time        = 12:02:04
+ * System Time      = 00:06:16
+ * Wallclock Time   = 02:22:55
+ * CPU              = 12:08:20
+ * Max vmem         = 5.428G
 
 The resulting count files can be transferred to the local computer for downstream analyses.

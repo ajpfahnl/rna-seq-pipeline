@@ -1,0 +1,10 @@
+qsub -N trim_0685 02_trim.sh TV_1_pool_24_RNA_0685
+qsub -N trim_0685_FA256 02_trim.sh TV_1_pool_24_RNA_0685_FA256
+
+qsub -N map_0685 04_hisat2_map.sh TV_1_pool_24_RNA_0685
+qsub -N map_0685_FA256 04_hisat2_map.sh TV_1_pool_24_RNA_0685_FA256
+
+qsub 05_merge_sam.sh TV_1_pool_24_RNA_0685 TV_1_pool_24_RNA_0685_FA256 merge_0685
+
+qsub 06_count.sh merge_0685 counts_0685
+
