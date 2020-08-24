@@ -6,9 +6,11 @@ in the Tarling-Vallim lab.
 ## Getting Started
 To execute this pipeline, you will need an account on the Hoffman2 server. I do everything in a folder `$SCRATCH/rna-seq`.
 
-Create a folder `rna-seq/scripts` where we store all our scripts.
+Create a folder `rna-seq/scripts` where we store all our scripts. This is also where we will be running all our scripts from.
 
 To see an overview of what the project directory should look like at the end, check out the directory tree [here](tree.md). 
+
+To get a gauge for the computational resources used, check out the statistics [here](stats.md).
 
 ### Downloading from Google Drive
 `gdown` is a good CLI tool which you can check out [here](https://pypi.org/project/gdown/). These are the steps I used:
@@ -46,20 +48,13 @@ rm htSeqTools.zip
 Make sure to add to your `$PATH` variable as described under _Getting Started_.
 ### Demultiplexing
 #### 01_demultiplex.sh
-The script assumes `$CRED` folders are located in a folder `01_qseq`. Adjust `cd` commands as necessary. \
+The script assumes `$CRED` folders are located in a folder `01_qseq`. \
 You may also need to adjust the output path in the `demultiplexer` or `qseq2fastq` Perl scripts that you installed from `htSeqTools`. \
 To run this script, use the following command:
 ```
 qsub 01_demultiplex.sh
 ```
 This will create a directory called `02_fastq` that contains all fastq files, and a directory called `03_demultiplexed` that contains all demultiplexed files for each lane.
-
-Test data (options `-l h_data=16g,h_rt=48:00:00,highp -pe shared 2`):
- * User Time: 1:21:03:12
- * System Time: 00:28:25
- * Wallclock Time: 22:38:34
- * CPU: 1:21:31:37
- * Max vmem: 7.030G
 
 ## 2. Trimming
 This is a necessary step because we need to trim adaptor sequences that were added on for sequencing after isolating RNA. We then remove any low quality bases based on a Q value (which is defined as the negative log of the probability the base was called incorrectly). The Q value tends to decrease (quality gets worse) towards the 3’ end of the read. These lower quality regions can negatively impact downstream analyses such as mapping, mutation calling, etc. We will do this using cutadapt.
@@ -74,22 +69,14 @@ Make sure the `~/.local/bin` folder is added to `$PATH`.
 ### Trimming
 Trim with the following script:
 #### 02_trim.sh
-Before you run the trimming, make sure that Python 3.7 is launched. An easy way to ensure this is to run the following commands:
+Before you run the trimming, make sure that Python 3.7 is launched:
 ```
-alias python=python3
 module load python/3.7.0
 ```
 To run the trimming, run the following for each lane:
 ```
 qsub -N <trim_name> 02_trim.sh <lane>
 ```
-
-Test data (options: `-l h_data=4G,h_rt=2:00:00 -pe shared 4`):
- * User Time        = 05:19:24
- * System Time      = 00:08:04
- * Wallclock Time   = 00:21:54
- * CPU              = 05:27:29
- * Max vmem         = 25.011G
  
 ## 3. Quality Control
 The purpose of quality control is to look for repetitive sequences. If it's there, it could be due to an error where the machine keeps sequencing the same fragment over and over again. As such, we need to get rid of it from the whole pool of sequences. Another issue is that maybe when trimming we didn't trim enough and kept a little of the adaptor sequences. We can check if something matches an illumina adaptor here. Lastly, we look for overrepresentation of certain base pairs at a particular position along fragment, since they should be equally divided.
@@ -142,13 +129,14 @@ Before running, make sure you load the hisat2 module:
 ```
 module load hisat2
 ```
-To build from source for HISAT2 2.2.1, in your home directory `~`:
+To build from source for the latest version of HISAT2, in your home directory `~` using HISAT 2.2.1 as an example:
 ```
 module purge
 module load gcc/7.2.0
 wget https://cloud.biohpc.swmed.edu/index.php/s/fE9QCsX3NH4QwBi/download
 unzip download
 rm download
+cd hisat2-2.2.1
 make
 export PATH=~/hisat2-2.2.1:$PATH
 ```
@@ -163,12 +151,6 @@ The script builds the index with the following command (`-p` option for more cor
 ```
 hisat2-build GRCm38.p6.genome.fa -p 4 GRCm38
 ```
-Test data (options: `-l h_rt=1:00:00,h_data=4G -pe shared 4`):
- * User Time        = 01:27:28
- * System Time      = 00:01:28
- * Wallclock Time   = 00:26:07
- * CPU              = 01:28:57
- * Max vmem         = 5.881G
  
 ### Mapping
 #### 04_hisat2_map.sh
@@ -178,13 +160,6 @@ Run the script for each trimmed lane like the command below:
 qsub -N map_L3 04_hisat2_map.sh SxaQSEQsYB051L3
 ```
 Lastly, we can view the statistics of the alignment by checking the error output once the script has terminated.
-
-Test data (options: `-l h_data=5G,h_rt=4:00:00 -pe shared 4`):
- * User Time        = 04:08:43
- * System Time      = 00:32:28
- * Wallclock Time   = 01:17:18
- * CPU              = 05:04:10
- * Max vmem         = 4.518G
 
 ## 5. Merging
 If we have replicates, now is the time to merge the datasets together. For instance if lane 2 and lane 3 are replicates of one another, then we merge their mapped reads together. We do this using picard tools.
@@ -212,18 +187,12 @@ java -jar ~/picard/build/libs/picard.jar -h
 ```
 ### Merging
 Next, we merge the sam files output from the previous step. \
-Note: We can also use the built-in version of picard tools with `module load picard_tools` and omit setting the `$PICARD` variable in the script
+Note: We can also use the built-in version of picard tools with `module load picard_tools`.
 #### 05_merge_sam.sh
 We can then merge lanes (e.g. L3 and L4) using the following command as an example:
 ```
 qsub 05_merge_sam.sh SxaQSEQsYB051L3 SxaQSEQsYB051L4 L3_L4_merge
 ```
-Test data (`-l h_data=4G,h_rt=4:00:00 -pe shared 4`):
- * User Time        = 04:50:12
- * System Time      = 00:23:29
- * Wallclock Time   = 01:27:11
- * CPU              = 05:13:42
- * Max vmem         = 45.443G
 ## 6. Counting
 Finally, we'll generate counts for each of the genes that we mapped our reads too. The final product will be a list of genes and their counts. We will do this using `htseq-count`.
 ### Download Gene Annotations
@@ -243,11 +212,5 @@ Adjust the gene annotation file name as necessary, and run like so:
 ```
 qsub 06_count.sh L3_L4_merge L3_L4_counts
 ```
-Test data (`-l h_data=6G,h_rt=3:30:00 -pe shared 8`):
- * User Time        = 12:02:04
- * System Time      = 00:06:16
- * Wallclock Time   = 02:22:55
- * CPU              = 12:08:20
- * Max vmem         = 5.428G
 
 The resulting count files can be transferred to the local computer for downstream analyses.

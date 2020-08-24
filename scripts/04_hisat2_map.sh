@@ -12,21 +12,11 @@
 
 lane=$1
 
-
 sourcedir="05_hisat2_map"
 outdir="04_trim"
-dir_check () {
-    if [ ! -d "../${sourcedir}/" ]
-    then
-        mkdir ../${sourcedir}/
-    fi
-    if [ ! -d "../${sourcedir}/$lane" ]
-    then
-        mkdir ../${sourcedir}/${lane}
-    fi
-}
 
-dir_check
+mkdir -p ../${sourcedir}/${lane}
+
 cd ../$outdir/$lane
 
 for i in *

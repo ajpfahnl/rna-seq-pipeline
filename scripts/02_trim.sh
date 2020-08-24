@@ -13,28 +13,33 @@ lane=$1
 # number of cores
 N=4
 
-# -- rna-seq-pipeline
+# -- rna-seq
+#     |
 #     |-- demuxdir
+#     |    |-- lane
+#     |
 #     |-- trimdir
+#          |-- trimlane
 
 demuxdir=03_demultiplexed
 trimdir=04_trim
 
 trim () {
-	local fastq=$1
+	local inF=$1 # fastq
     local lane=$2
-    local trimmedFastq="trim_${fastq}"
+    local trimmedFastq="trim_${inF}"	
+	local outF=../../$trimdir/$lane/$trimmedFastq
     echo "Creating trimmed file: $trimmedFastq"
 	cutadapt \
 		--quiet \
 		-j 0 \
-        -a GATCGGAAGAGCACACGTCTGAACTCCAGTCACNNNNNNATCTCGTATGCCGTCTTCTGCTTG \
-        -a "A{10}" \
-        -a "T{10}" \
-        -m 15 \
-        -q 30 \
-        -o ../../04_trim/$lane/$trimmedFastq \
-	$fastq
+		-a GATCGGAAGAGCACACGTCTGAACTCCAGTCACNNNNNNATCTCGTATGCCGTCTTCTGCTTG \
+		-a "A{10}" \
+		-a "T{10}" \
+		-m 15 \
+		-q 30 \
+		-o $outF \
+		$inF
 	echo "Finished creating: $trimmedFastq"
 }
 
@@ -45,22 +50,11 @@ lane_trim () {
 		((i=i%N)); ((i++==0)) && wait
 		trim "$file" "$lane" & 
 	done
-}
-
-dir_check () {
-    local lane=$1
-    if [ ! -d "../$trimdir" ]
-    then
-	mkdir ../$trimdir
-    fi
-    if [ ! -d "../$trimdir/$lane" ]
-    then
-	mkdir ../$trimdir/$lane
-    fi
+	wait
 }
 
 # check and create necessary directories
-dir_check $lane
+mkdir -p ../$trimdir/$lane
 # trim lane
 cd ../$demuxdir/$lane
 lane_trim $lane

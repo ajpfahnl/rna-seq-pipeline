@@ -36,18 +36,6 @@ set_src_dir () {
     fi
 }
 
-
-dir_check () {
-    if [ ! -d "./${out_dir}/" ]
-    then
-        mkdir ./${out_dir}/
-    fi
-    if [ ! -d "./${out_dir}/${count_dir}" ]
-    then
-        mkdir ./${out_dir}/${count_dir}
-    fi
-}
-
 count () {
     local file_base=$(echo $1 | grep -o "^[^.]*")
     echo $file_base
@@ -60,7 +48,7 @@ count () {
 }
 
 set_src_dir
-dir_check
+mkdir -p ./${out_dir}/${count_dir}
 
 N=8
 

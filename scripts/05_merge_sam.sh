@@ -21,21 +21,6 @@ lane2_map=05_hisat2_map/$2
 merge_dir=$3
 logs_dir=./06_merge_sam/logs
 
-dir_check () {
-    if [ ! -d "./06_merge_sam/" ]
-    then
-        mkdir ./06_merge_sam/
-    fi
-    if [ ! -d "./06_merge_sam/$merge_dir" ]
-    then
-        mkdir ./06_merge_sam/${merge_dir}
-    fi
-    if [ ! -d "./06_merge_sam/logs" ]
-    then
-	mkdir ./06_merge_sam/logs
-    fi
-}
-
 merge () {
     local i=$1
 	local i_strip=$(echo $1 | grep -o "^[^.]*")
@@ -48,7 +33,8 @@ merge () {
 	2>&1
 }
 
-dir_check
+mkdir -p ./06_merge_sam/$merge_dir
+mkdir -p ./06_merge_sam/logs
 
 # number of processors
 N=4

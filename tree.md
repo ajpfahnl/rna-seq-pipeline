@@ -1,5 +1,4 @@
 An example directory tree of `rna-seq`:
-
 ```
 rna-seq
 ├── 03_demultiplexed
@@ -74,7 +73,11 @@ rna-seq
 │   │   ├── trim_2_S2_R1_001.fastq.gz
 │   │   ├── trim_3_S3_R1_001.fastq.gz
 │   │   ├── trim_4_S4_R1_001.fastq.gz
-│   │   └── trim_5_S5_R1_001.fastq.gz
+│   │   ├── trim_5_S5_R1_001.fastq.gz
+│   │   ├── trim_6_S6_R1_001.fastq.gz
+│   │   ├── trim_7_S7_R1_001.fastq.gz
+│   │   ├── trim_8_S8_R1_001.fastq.gz
+│   │   └── trim_9_S9_R1_001.fastq.gz
 │   └── TV_1_pool_24_RNA_0685_FA256
 │       ├── trim_10_S10_R1_001.fastq.gz
 │       ├── trim_11_S11_R1_001.fastq.gz
@@ -95,7 +98,11 @@ rna-seq
 │       ├── trim_2_S2_R1_001.fastq.gz
 │       ├── trim_3_S3_R1_001.fastq.gz
 │       ├── trim_4_S4_R1_001.fastq.gz
-│       └── trim_5_S5_R1_001.fastq.gz
+│       ├── trim_5_S5_R1_001.fastq.gz
+│       ├── trim_6_S6_R1_001.fastq.gz
+│       ├── trim_7_S7_R1_001.fastq.gz
+│       ├── trim_8_S8_R1_001.fastq.gz
+│       └── trim_9_S9_R1_001.fastq.gz
 ├── 05_hisat2_map
 │   ├── TV_1_pool_24_RNA_0685
 │   │   ├── trim_10_S10_R1_001.sam
@@ -117,7 +124,11 @@ rna-seq
 │   │   ├── trim_2_S2_R1_001.sam
 │   │   ├── trim_3_S3_R1_001.sam
 │   │   ├── trim_4_S4_R1_001.sam
-│   │   └── trim_5_S5_R1_001.sam
+│   │   ├── trim_5_S5_R1_001.sam
+│   │   ├── trim_6_S6_R1_001.sam
+│   │   ├── trim_7_S7_R1_001.sam
+│   │   ├── trim_8_S8_R1_001.sam
+│   │   └── trim_9_S9_R1_001.sam
 │   └── TV_1_pool_24_RNA_0685_FA256
 │       ├── trim_10_S10_R1_001.sam
 │       ├── trim_11_S11_R1_001.sam
@@ -138,7 +149,11 @@ rna-seq
 │       ├── trim_2_S2_R1_001.sam
 │       ├── trim_3_S3_R1_001.sam
 │       ├── trim_4_S4_R1_001.sam
-│       └── trim_5_S5_R1_001.sam
+│       ├── trim_5_S5_R1_001.sam
+│       ├── trim_6_S6_R1_001.sam
+│       ├── trim_7_S7_R1_001.sam
+│       ├── trim_8_S8_R1_001.sam
+│       └── trim_9_S9_R1_001.sam
 ├── 06_merge_sam
 │   ├── logs
 │   │   ├── trim_10_S10_R1_001.log
@@ -160,7 +175,11 @@ rna-seq
 │   │   ├── trim_2_S2_R1_001.log
 │   │   ├── trim_3_S3_R1_001.log
 │   │   ├── trim_4_S4_R1_001.log
-│   │   └── trim_5_S5_R1_001.log
+│   │   ├── trim_5_S5_R1_001.log
+│   │   ├── trim_6_S6_R1_001.log
+│   │   ├── trim_7_S7_R1_001.log
+│   │   ├── trim_8_S8_R1_001.log
+│   │   └── trim_9_S9_R1_001.log
 │   └── merge_0685
 │       ├── trim_10_S10_R1_001_merged.sam
 │       ├── trim_11_S11_R1_001_merged.sam
@@ -181,7 +200,11 @@ rna-seq
 │       ├── trim_2_S2_R1_001_merged.sam
 │       ├── trim_3_S3_R1_001_merged.sam
 │       ├── trim_4_S4_R1_001_merged.sam
-│       └── trim_5_S5_R1_001_merged.sam
+│       ├── trim_5_S5_R1_001_merged.sam
+│       ├── trim_6_S6_R1_001_merged.sam
+│       ├── trim_7_S7_R1_001_merged.sam
+│       ├── trim_8_S8_R1_001_merged.sam
+│       └── trim_9_S9_R1_001_merged.sam
 ├── 07_counts
 │   └── counts_0685
 │       ├── trim_10_S10_R1_001_merged.count
@@ -203,9 +226,13 @@ rna-seq
 │       ├── trim_2_S2_R1_001_merged.count
 │       ├── trim_3_S3_R1_001_merged.count
 │       ├── trim_4_S4_R1_001_merged.count
-│       └── trim_5_S5_R1_001_merged.count
+│       ├── trim_5_S5_R1_001_merged.count
+│       ├── trim_6_S6_R1_001_merged.count
+│       ├── trim_7_S7_R1_001_merged.count
+│       ├── trim_8_S8_R1_001_merged.count
+│       └── trim_9_S9_R1_001_merged.count
 ├── FastQC_reports
-│   ├── trim_10_S10_R1_001_fastqc.html
+│   ├── 10_S10_R1_001_fastqc.zip
 │   └── trim_10_S10_R1_001_fastqc.zip
 ├── GENAN
 │   └── gencode.vM25.annotation.gff3
@@ -227,16 +254,16 @@ rna-seq
     ├── 05_merge_sam.sh
     ├── 06_count.sh
     ├── commands
+    ├── count.e4179723
+    ├── count.o4179723
+    ├── count.pe4179723
+    ├── count.po4179723
     └── logs
-        ├── count.e4166709
-        ├── count.o4166709
-        ├── index_build.e4153456
-        ├── index_build.o4153456
-        ├── map_0685.e4156974
-        ├── map_0685_FA256.e4156975
-        ├── merge.o4161352
-        ├── trim_0685_FA256.o4156902
-        └── trim_0685.o4156900
+        ├── map_0685.e4173844
+        ├── map_0685_FA256.e4173849
+        ├── merge.o4175666
+        ├── trim_0685_FA256.o4173413
+        └── trim_0685.o4173412
 
-19 directories, 216 files
+19 directories, 244 files
 ```
