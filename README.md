@@ -47,7 +47,7 @@ rm htSeqTools.zip
 ```
 Make sure to add to your `$PATH` variable as described under _Getting Started_.
 ### Demultiplexing
-#### 01_demultiplex.sh
+#### [01_demultiplex.sh](scripts/01_demultiplex.sh)
 The script assumes `$CRED` folders are located in a folder `01_qseq`. \
 You may also need to adjust the output path in the `demultiplexer` or `qseq2fastq` Perl scripts that you installed from `htSeqTools`. \
 To run this script, use the following command:
