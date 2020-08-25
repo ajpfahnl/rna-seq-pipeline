@@ -68,7 +68,7 @@ pip3 install --user --upgrade cutadapt
 Make sure the `~/.local/bin` folder is added to `$PATH`.
 ### Trimming
 Trim with the following script:
-#### 02_trim.sh
+#### [02_trim.sh](scripts/02_trim.sh)
 Before you run the trimming, make sure that Python 3.7 is launched:
 ```
 module load python/3.7.0
@@ -146,14 +146,14 @@ module purge
 module load python/3.7.2
 module load gcc/7.2.0
 ```
-#### 03_index_build.sh 
+#### [03_index_build.sh](scripts/03_index_build.sh)
 The script builds the index with the following command (`-p` option for more cores):
 ```
 hisat2-build GRCm38.p6.genome.fa -p 4 GRCm38
 ```
  
 ### Mapping
-#### 04_hisat2_map.sh
+#### [04_hisat2_map.sh](scripts/04_hisat2_map.sh)
 Adjust the `../../GENCODE/GRCm38` path for option `-x` to the basename of the index for the reference genome, if necessary. The basename is the name of any of the index files up to but not including the final `.1.ht2`, `.2.ht2`, etc. \
 Run the script for each trimmed lane like the command below:
 ```
@@ -188,7 +188,7 @@ java -jar ~/picard/build/libs/picard.jar -h
 ### Merging
 Next, we merge the sam files output from the previous step. \
 Note: We can also use the built-in version of picard tools with `module load picard_tools`.
-#### 05_merge_sam.sh
+#### [05_merge_sam.sh](scripts/05_merge_sam.sh)
 We can then merge lanes (e.g. L3 and L4) using the following command as an example:
 ```
 qsub 05_merge_sam.sh SxaQSEQsYB051L3 SxaQSEQsYB051L4 L3_L4_merge
@@ -207,7 +207,7 @@ python3 setup.py build install --user
 ```
 ### Counting
 Load a recent version of Python 3, e.g.: `module load python/3.7.2`.
-#### 06_count.sh
+#### [06_count.sh](scripts/06_count.sh)
 Adjust the gene annotation file name as necessary, and run like so:
 ```
 qsub 06_count.sh L3_L4_merge L3_L4_counts
