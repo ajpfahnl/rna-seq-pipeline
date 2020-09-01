@@ -214,3 +214,6 @@ qsub 06_count.sh L3_L4_merge L3_L4_counts
 ```
 
 The resulting count files can be transferred to the local computer for downstream analyses.
+
+# RNA Sequencing Counts Analysis
+For this pipeline, I will use the DESeq2 package available in Bioconductor. Check out my R Markdown notebook [here](analyze_counts.Rmd) for a sample analysis pipeline.

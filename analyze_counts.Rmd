@@ -1,0 +1,252 @@
+---
+title: "analyze_counts"
+author: "Arnold Pfahnl"
+date: "8/29/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Setup
+## Load libraries and file info
+```{r}
+library(DESeq2)
+library("biomaRt")
+library(readxl)
+library(tidyverse)
+
+htseq_dir = "counts"
+count_files <- list.files("counts")
+```
+
+## Extract experiment info
+transcriptome of alveolar macrophages (TAM)
+```{r}
+exp_files <- grep("^trim_\\d_.*|^trim_[1][0-2]_.*", count_files, value = TRUE)
+exp <- data.frame(
+  files = exp_files,
+  samples = gsub("^trim_(\\d+)_.*", "\\1", exp_files)
+)
+
+condition = c()
+i = 1
+for (sample in exp$samples) {
+  if (sample %in% c(1,2,6)) {
+    condition[i] <- "Wt"
+  }
+  else if (sample %in% c(3,4,5)) {
+    condition[i] <- "G1_KO"
+  }
+  else if (sample %in% c(7,8)) {
+    condition[i] <- "G1_LyzM_KO"
+  }
+  else {
+    condition[i] <- "Csf2rb_KO"
+  }
+  i <- i + 1
+}
+
+exp <- cbind(exp, condition = condition)
+
+exp
+
+ref = "Wt"
+condition_names <- c("G1_KO", "G1_LyzM_KO", "Csf2rb_KO")
+```
+transcriptome of B-cells (TBC)
+```{r}
+exp_files <- grep("^trim_[1][^0-2]_|^trim_2\\d_", count_files, value = TRUE)
+exp <- data.frame(
+  files = exp_files,
+  samples = gsub("^trim_(\\d+)_.*", "\\1", exp_files)
+)
+
+condition = c()
+i = 1
+for (sample in exp$samples) {
+  if (sample %in% c(13, 14, 20, 21, 23, 24)) {
+    condition[i] <- "Cre_pos"
+  }
+  else {
+    condition[i] <- "Cre_neg"
+  }
+  i <- i + 1
+}
+
+exp <- cbind(exp, condition = condition)
+
+exp
+
+ref = "Cre_neg"
+condition_names <- c("Cre_pos")
+```
+
+```{r}
+# DESeq2 import using DESeqDataSetFromHTSeqCount()
+sampleTable <- data.frame(sampleName = exp$files,
+                          fileName = exp$files,
+                          condition = exp$condition)
+
+ddsHTSeq <- DESeqDataSetFromHTSeqCount(sampleTable = sampleTable,
+                                       directory = htseq_dir,
+                                       design= ~ condition)
+ddsHTSeq
+
+# Pre-filtering
+keep <- rowSums(counts(ddsHTSeq)) >= 10
+dds <- ddsHTSeq[keep,]
+dds
+
+# Relevel
+dds$condition <- relevel(dds$condition, ref = ref)
+
+
+# Differential expression analysis
+dds <- DESeq(dds)
+
+res_list = list()
+for (name in condition_names) {
+	res <- results(dds, contrast = c("condition", ref, name))
+	res_list[[name]] <- res
+	#write.csv(res, sprintf("results/%s_vs_%s.csv", name, ref))
+}
+
+
+summary(res_list[[1]], 0.05)
+
+sum(res_list[[1]]$padj < 0.05, na.rm=TRUE)
+```
+
+# Determine secretion
+```{r}
+AEGDEA = read_excel("All_Expressed_Genes_DifferentialExpression_AntimiRs.xlsx", sheet = 1, skip =1)
+
+listEnsembl()
+mouse_ensembl <- useEnsembl(biomart = "ensembl", dataset = "mmusculus_gene_ensembl", mirror = "uswest")
+#mouse_ensembl = useMart("ensembl",dataset="mmusculus_gene_ensembl")
+
+# optional info about mart objects
+mouse_filt = listFilters(mouse_ensembl) # what filters
+mouse_attri = listAttributes(mouse_ensembl) # what attributes
+
+
+create_secrete_data <- function(res, AEGDEA, mouse_ensembl) {
+	# extract ensembl ids from the DESeq results table
+	ensembl_ids = rownames(res)
+	
+	### ### ### ### ### ### ### ### ### ### ### 
+	### CREATE TABLE WITH GENE NAME CONVERSIONS
+	### ### ### ### ### ### ### ### ### ### ### 
+	
+	# extract data from biomart (adjust attributes and filters as necessary)
+	# e.g. my ensembl ids that I input have version ids so the filter I use is 
+	#      ensembl_gene_id_version
+	gene_ids = getBM(attributes = c("ensembl_gene_id_version", "ensembl_gene_id", 
+									"entrezgene_id", "uniprot_gn_id", "uniprot_gn_symbol", 
+									"external_gene_name"),
+	                 filters    = c("ensembl_gene_id_version"),
+	                 values     = ensembl_ids,
+	                 mart       = mouse_ensembl)
+	gene_ids = tibble::as_tibble(gene_ids)
+	
+	### ### ### ### ### ### ### ### ### ### 
+	### ENSEMBL GENES WITH SECRETION TAG
+	### ### ### ### ### ### ### ### ### ### 
+	
+	# extract uniprot genes from the EXCEL file with 
+	# with their secretion tags
+	secrete = data.frame("Uniprot" = AEGDEA$Uniprot,
+	                     "Secreted"  = AEGDEA$Secreted)
+	
+	secrete = subset(secrete, !is.na(Secreted), select = c(Uniprot, Secreted))
+	secrete = tibble::as_tibble(secrete) # convert to tbl class
+	#write.csv(secrete, "uniprot_secrete.csv")
+	
+	# add ensembl name column
+	secrete = mutate(secrete, Ensembl = NA)
+	
+	for (i in 1:nrow(secrete)) {
+	  uniprot = secrete$Uniprot[i]
+	  ensembl = filter(gene_ids, uniprot_gn_id == uniprot)$ensembl_gene_id
+	  if (!identical(ensembl, character(0))) {
+	    secrete$Ensembl[i] = ensembl
+	  }
+	}
+	
+	# extract the genes that were expressed and create a .csv file
+	secrete_filt <- filter(secrete, !is.na(secrete$Ensembl))
+	#write.csv(secrete_filt, "secrete7D.csv")
+	
+	# Ensembl genes in results that are secreted
+	res_secreted = data.frame(gene_name = rep(NA, length(ensembl_ids)),
+	                          Uniprot_gn_id = NA,
+	                          Secreted = NA)
+	res_secreted = tibble::as_tibble(res_secreted)
+	
+	for (i in 1:nrow(res_secreted)) {
+	  # my ensembl genes have version numbers
+	  # so the sub command gets rid of those
+	  # should still work with normal ensembl
+	  # gene names
+	  gene_exp = sub("^([^.]*).*","\\1", ensembl_ids[i])
+	  secrete_filt_row = filter(secrete_filt, Ensembl == gene_exp)
+	  secreted = secrete_filt_row$Ensembl
+	  a_uniprot = secrete_filt_row$Uniprot
+	  if (!identical(secreted, character(0))) {
+	    res_secreted$Secreted[i] = 'Y'
+	    res_secreted$Uniprot_gn_id[i] = toString(a_uniprot)
+	  }
+	  else {
+	    res_secreted$Secreted[i] = ''
+	    res_secreted$Uniprot_gn_id[i] = ''
+	  }
+	  
+	  res_secreted$gene_name[i] <- gene_ids$external_gene_name[gene_ids$ensembl_gene_id == gene_exp][1]
+	  
+	}
+	return(as.data.frame(res_secreted))
+}
+```
+
+```{r}
+res_list <- lapply(res_list, function(res) {
+	res <- cbind(res, create_secrete_data(res, AEGDEA, mouse_ensembl))
+})
+
+for (name in names(res_list)) {
+	write.csv(res_list[[name]], sprintf("results/%s_vs_%s.csv", name, ref))
+}
+```
+
+# Visualizations
+```{r, fig.height = 8, fig.width = 6, dpi = 400}
+### Enhanced Volcano Plot
+
+library(EnhancedVolcano)
+
+EVolcanoPlot <- function(res, name, ref) {
+	name <- gsub("_", " ", name)
+	pcut_exp = 2
+	fcut = 1.5
+	p <- EnhancedVolcano(res,
+                lab = res$gene_name,
+                title = sprintf("%s vs. %s", name, ref),
+                x = 'log2FoldChange',
+                y = 'pvalue',
+                pCutoff = 10*10**(-pcut_exp),
+                FCcutoff = fcut,
+                ylim = c(0, 10),
+                xlim = c(-10, 10))
+	return(p)
+}
+
+
+for (name in names(res_list)) {
+	png(sprintf("plots/%s.png", name), width = 1200, height = 1800, res = 150)
+	print(EVolcanoPlot(res_list[[name]], name, ref))
+	dev.off()
+	
+}
+```
