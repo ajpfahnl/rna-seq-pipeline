@@ -1,6 +1,8 @@
 #!/bin/bash
 #$ -cwd
 #$ -V
+#$ -j y
+#$ -o logs/$JOB_NAME.$JOB_ID.log
 #$ -N merge
 #$ -l h_data=4G,h_rt=4:00:00
 #$ -pe shared 4

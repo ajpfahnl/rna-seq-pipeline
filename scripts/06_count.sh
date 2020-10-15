@@ -2,6 +2,8 @@
 #$ -cwd
 #$ -N count
 #$ -V
+#$ -j y
+#$ -o logs/$JOB_NAME.$JOB_ID.log
 #$ -l h_data=6G,h_rt=3:30:00
 #$ -pe shared 8
 #$ -M $USER

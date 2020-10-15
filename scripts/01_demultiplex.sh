@@ -2,6 +2,8 @@
 #$ -cwd
 #$ -N demultiplex
 #$ -V
+#$ -j y
+#$ -o logs/$JOB_NAME.$JOB_ID.log
 #$ -l h_data=16g,h_rt=48:00:00,highp
 #$ -pe shared 2
 #$ -M $USER

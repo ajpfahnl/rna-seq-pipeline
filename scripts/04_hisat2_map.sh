@@ -1,6 +1,8 @@
 #!/bin/bash
 #$ -cwd
 #$ -V
+#$ -j y
+#$ -o logs/$JOB_NAME.$JOB_ID.log
 #$ -l h_data=5G,h_rt=4:00:00
 #$ -pe shared 4
 #$ -M $USER
